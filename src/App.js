@@ -8,20 +8,22 @@ import 'react-clock/dist/Clock.css';
 
 export default function App() {
  var initBeginTime = new Date()
- initBeginTime.setHours(initBeginTime.getHours() - 12)
+ initBeginTime.setHours(initBeginTime.getHours() - 48)
  
  const [ catEvents, setCatEvents ] = useState([])
  const [ nameOptions, setNameOptions ] = useState([])
+ const [ activityOptions, setActivityOptions ] = useState([])
  const [ beginTime, setBeginTime ] = useState(initBeginTime)
  const [ endTime, setEndTime ] = useState(new Date())
  
  const namesRef = createRef();
+ const activitiesRef = createRef();
  
  async function getEvents() {
-       var weatherUrl = 'http://localhost:8080/api/cats/events?beginTime=' + (beginTime.valueOf()/1000).toFixed(0) + '&endTime=' + (endTime.valueOf()/1000).toFixed(0)
+       var catUrl = 'http://localhost:8080/api/cats/events?beginTime=' + (beginTime.valueOf()/1000).toFixed(0) + '&endTime=' + (endTime.valueOf()/1000).toFixed(0)
        
        var namesString = ""
-       console.log(namesRef.current.getSelectedItems())
+       var activitiesString = ""
        namesRef.current.getSelectedItems().forEach(function(arrayItem){
          if (namesString.length !== 0) {
            namesString += ","
@@ -30,10 +32,21 @@ export default function App() {
        });
 
        if (namesString.length !== 0) {
-         weatherUrl += "&names=" + namesString
+         catUrl += "&names=" + namesString
        }
  
-       const response = await fetch(weatherUrl);
+       activitiesRef.current.getSelectedItems().forEach(function(arrayItem){
+         if (activitiesString.length !== 0) {
+           activitiesString += ","
+         }
+         activitiesString += arrayItem.name
+       });
+
+       if (activitiesString.length !== 0) {
+         catUrl += "&activity=" + activitiesString
+       }
+ 
+       const response = await fetch(catUrl);
        const data = await response.json();
 
        setCatEvents(data.events)      
@@ -41,7 +54,7 @@ export default function App() {
  
  useEffect(() => {
    getEvents();
-}, [endTime, beginTime, nameOptions, namesRef.current]);
+}, [endTime, beginTime, nameOptions, namesRef.current, activitiesRef.current]);
  
  useEffect(() => {
    const fetchNames = async () => {
@@ -61,8 +74,28 @@ export default function App() {
           setNameOptions(nameOptions)      
    }
  
+   const fetchActivities = async () => {
+ 
+       const response = await fetch(
+         'http://localhost:8080/api/cats/activity');
+          const data = await response.json();
+          
+          let activityOptions = [];
+          
+          data.names.forEach(function(arrayItem){
+            if (arrayItem != "") {
+              var activityOption = {};
+              activityOption.name = arrayItem;
+              activityOptions.push(activityOption);
+            }
+          });
+
+          setActivityOptions(activityOptions)      
+   }
+ 
    // Call the function
    fetchNames();
+   fetchActivities();
 }, []);
 
  return (
@@ -71,6 +104,9 @@ export default function App() {
      <table width="360">
      <tr>
        Names: <Multiselect name="targetNames" options={nameOptions} ref={namesRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={nameOptions} />
+     </tr>
+     <tr>
+       Activity: <Multiselect name="targetActivies" options={activityOptions} ref={activitiesRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={activityOptions} />
      </tr>
      <tr>
       From: <DateTimePicker name="beginTime" value={beginTime } onChange={setBeginTime } />
@@ -95,7 +131,7 @@ export default function App() {
          <tr key={key}>
              <td className={catEvent.cat_name === 'Savi' ? 'savi-data' : 'sydney-data' }>{catEvent.human_time }</td>
              <td className={catEvent.cat_name === 'Savi' ? 'savi-data' : 'sydney-data' }>{catEvent.cat_name }</td>
-             <td className={catEvent.cat_name === 'Savi' ? 'savi-data' : 'sydney-data' }>{catEvent.cat_activity }</td>
+             <td className={catEvent.cat_name === 'Savi' ? 'savi-data' : 'sydney-data' }><a target="top" href={catEvent.image_url }>{catEvent.cat_activity == 'Poop' ? '💩' : '💦' }</a></td>
              <td className={catEvent.cat_name === 'Savi' ? 'savi-data' : 'sydney-data' }>{catEvent.location }</td>
              <td className={catEvent.cat_name === 'Savi' ? 'savi-data' : 'sydney-data' }>{catEvent.elapsed }</td>
          </tr>
