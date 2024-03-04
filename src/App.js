@@ -29,9 +29,9 @@ export default function App() {
          namesString += arrayItem.name
        });
 
-//       if (namesString.length !== 0) {
-//         weatherUrl += "&locations=" + namesString
-//       }
+       if (namesString.length !== 0) {
+         weatherUrl += "&names=" + namesString
+       }
  
        const response = await fetch(weatherUrl);
        const data = await response.json();
