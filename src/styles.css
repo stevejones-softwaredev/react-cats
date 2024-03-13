@@ -27,6 +27,12 @@ th{
   color: white;
 }
 
+.notacat-data {
+  text-align: center;
+  padding: 5px 10px;
+  background-color:rgb(40, 255, 40)
+}
+
 a {
   text-decoration: none;
   color: black;

@@ -1,5 +1,6 @@
 {
-  "name": "weather",
+  "name": "cat",
+  "homepage": "https://steve-jones.dev/web/cat/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

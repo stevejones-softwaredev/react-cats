@@ -19,6 +19,26 @@ export default function App() {
  const namesRef = createRef();
  const activitiesRef = createRef();
  
+ function getActivityIcon(activity) {
+   if (activity === 'Poop') {
+     return '💩'
+   } else if (activity === 'Pee') {
+     return '💦'
+   } else {
+     return ''
+   }
+ }
+
+ function getClassName(name) {
+   if (name === 'Savi') {
+     return 'savi-data'
+   } else if (name === 'Sydney') {
+     return 'sydney-data'
+   } else {
+     return 'notacat-data'
+   }
+ }
+
  async function getEvents() {
        var catUrl = 'http://localhost:8080/api/cats/events?beginTime=' + (beginTime.valueOf()/1000).toFixed(0) + '&endTime=' + (endTime.valueOf()/1000).toFixed(0)
        
@@ -83,7 +103,7 @@ export default function App() {
           let activityOptions = [];
           
           data.names.forEach(function(arrayItem){
-            if (arrayItem != "") {
+            if (arrayItem !== "") {
               var activityOption = {};
               activityOption.name = arrayItem;
               activityOptions.push(activityOption);
@@ -129,11 +149,11 @@ export default function App() {
          {
          catEvents.map( (catEvent,key) =>
          <tr key={key}>
-             <td className={catEvent.cat_name === 'Savi' ? 'savi-data' : 'sydney-data' }>{catEvent.human_time }</td>
-             <td className={catEvent.cat_name === 'Savi' ? 'savi-data' : 'sydney-data' }>{catEvent.cat_name }</td>
-             <td className={catEvent.cat_name === 'Savi' ? 'savi-data' : 'sydney-data' }><a target="top" href={catEvent.image_url }>{catEvent.cat_activity == 'Poop' ? '💩' : '💦' }</a></td>
-             <td className={catEvent.cat_name === 'Savi' ? 'savi-data' : 'sydney-data' }>{catEvent.location }</td>
-             <td className={catEvent.cat_name === 'Savi' ? 'savi-data' : 'sydney-data' }>{catEvent.elapsed }</td>
+             <td className={getClassName(catEvent.cat_name) }>{catEvent.human_time }</td>
+             <td className={getClassName(catEvent.cat_name) }>{catEvent.cat_name }</td>
+             <td className={getClassName(catEvent.cat_name) }><a target="top" href={catEvent.image_url }>{getActivityIcon(catEvent.cat_activity)}</a></td>
+             <td className={getClassName(catEvent.cat_name) }>{catEvent.location }</td>
+             <td className={getClassName(catEvent.cat_name) }>{catEvent.elapsed }</td>
          </tr>
          )
        }
