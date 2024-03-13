@@ -40,7 +40,7 @@ export default function App() {
  }
 
  async function getEvents() {
-       var catUrl = 'http://localhost:8080/api/cats/events?beginTime=' + (beginTime.valueOf()/1000).toFixed(0) + '&endTime=' + (endTime.valueOf()/1000).toFixed(0)
+       var catUrl = process.env.REACT_APP_API_HOST + '/api/cats/events?beginTime=' + (beginTime.valueOf()/1000).toFixed(0) + '&endTime=' + (endTime.valueOf()/1000).toFixed(0)
        
        var namesString = ""
        var activitiesString = ""
@@ -79,8 +79,9 @@ export default function App() {
  useEffect(() => {
    const fetchNames = async () => {
  
+       console.log(process.env.REACT_APP_API_HOST)
        const response = await fetch(
-         'http://localhost:8080/api/cats/list');
+          process.env.REACT_APP_API_HOST + '/api/cats/list');
           const data = await response.json();
           
           let nameOptions = [];
@@ -97,7 +98,7 @@ export default function App() {
    const fetchActivities = async () => {
  
        const response = await fetch(
-         'http://localhost:8080/api/cats/activity');
+          process.env.REACT_APP_API_HOST + '/api/cats/activity');
           const data = await response.json();
           
           let activityOptions = [];
