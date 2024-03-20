@@ -33,6 +33,20 @@ th{
   background-color:rgb(40, 255, 40)
 }
 
+.long-interval-data {
+  text-align: center;
+  padding: 5px 10px;
+  background-color: yellow;
+  color: black;
+}
+
+.very-long-interval-data {
+  text-align: center;
+  padding: 5px 10px;
+  background-color: red;
+  color: white;
+}
+
 a {
   text-decoration: none;
   color: black;
