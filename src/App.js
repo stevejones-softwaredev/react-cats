@@ -48,7 +48,7 @@ export default function App() {
      if (event.cat_activity === 'Pee') {
        if (hours > 24) {
          return 'very-long-interval-data'
-       } else if (hours > 15) {
+       } else if (hours > 16) {
          return 'long-interval-data'
        }
      } else if (event.cat_activity === 'Poop') {
@@ -69,7 +69,7 @@ export default function App() {
      } else if (event.cat_activity === 'Poop') {
        if (hours > 36) {
          return 'very-long-interval-data'
-       } else if (hours > 3624) {
+       } else if (hours > 24) {
          return 'long-interval-data'
        }
      }
@@ -87,48 +87,49 @@ export default function App() {
 
    var dayCount = parseInt(elapsed.substring(0, spaceIndex))
    dayCount *= 24
-   spaceIndex = elapsed.substring(spaceIndex+1)
-   var hourIndex = elapsed.search(':')
-   console.log("For " + elapsed + "from " + spaceIndex + " to " + hourIndex + " == " + elapsed.substring(spaceIndex, hourIndex))
-   dayCount += parseInt(elapsed.substring(spaceIndex, hourIndex))
+   var parse = elapsed.substring(spaceIndex+1)
+   spaceIndex = parse.search(' ')
+   parse = parse.substring(spaceIndex+1)
+   var hourIndex = parse.search(':')
+   dayCount += parseInt(parse.substring(0, hourIndex))
    
    var newElapsed = dayCount.toString()
-   newElapsed += elapsed.substring(hourIndex)
+   newElapsed += parse.substring(hourIndex)
    
    return newElapsed
  }
 
  async function getEvents() {
-       var catUrl = process.env.REACT_APP_API_HOST + '/api/cats/events?beginTime=' + (beginTime.valueOf()/1000).toFixed(0) + '&endTime=' + (endTime.valueOf()/1000).toFixed(0)
-       
-       var namesString = ""
-       var activitiesString = ""
-       namesRef.current.getSelectedItems().forEach(function(arrayItem){
-         if (namesString.length !== 0) {
-           namesString += ","
-         }
-         namesString += arrayItem.name
-       });
+   var catUrl = process.env.REACT_APP_API_HOST + '/api/cats/events?beginTime=' + (beginTime.valueOf()/1000).toFixed(0) + '&endTime=' + (endTime.valueOf()/1000).toFixed(0)
 
-       if (namesString.length !== 0) {
-         catUrl += "&names=" + namesString
-       }
+   var namesString = ""
+   var activitiesString = ""
+   namesRef.current.getSelectedItems().forEach(function(arrayItem){
+     if (namesString.length !== 0) {
+       namesString += ","
+     }
+     namesString += arrayItem.name
+   });
+
+   if (namesString.length !== 0) {
+     catUrl += "&names=" + namesString
+   }
  
-       activitiesRef.current.getSelectedItems().forEach(function(arrayItem){
-         if (activitiesString.length !== 0) {
-           activitiesString += ","
-         }
-         activitiesString += arrayItem.name
-       });
+   activitiesRef.current.getSelectedItems().forEach(function(arrayItem){
+     if (activitiesString.length !== 0) {
+       activitiesString += ","
+     }
+     activitiesString += arrayItem.name
+   });
 
-       if (activitiesString.length !== 0) {
-         catUrl += "&activity=" + activitiesString
-       }
- 
-       const response = await fetch(catUrl);
-       const data = await response.json();
+   if (activitiesString.length !== 0) {
+     catUrl += "&activity=" + activitiesString
+   }
 
-       setCatEvents(data.events)      
+   const response = await fetch(catUrl);
+   const data = await response.json();
+
+   setCatEvents(data.events)      
  }
  
  useEffect(() => {
