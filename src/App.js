@@ -11,6 +11,7 @@ export default function App() {
  initBeginTime.setHours(initBeginTime.getHours() - 48)
  
  const [ catEvents, setCatEvents ] = useState([])
+ const [ currentEvents, setCurrentEvents ] = useState([])
  const [ nameOptions, setNameOptions ] = useState([])
  const [ activityOptions, setActivityOptions ] = useState([])
  const [ beginTime, setBeginTime ] = useState(initBeginTime)
@@ -78,10 +79,48 @@ export default function App() {
      return 'notacat-data'
  }
  
+ function getCurrentElapsedStyleName(event) {
+   var hourTime = normalizeElapsedTime(event.elapsed)
+   var hours = parseInt(hourTime.substring(0, hourTime.search(':')))
+   console.log("Elapsed: " + event.elapsed + " has hour count " + hours)
+
+   if (event.cat_name === 'Savi') {
+     if (event.cat_activity === 'Pee') {
+       if (hours > 24) {
+         return 'very-long-interval-data'
+       } else if (hours > 16) {
+         return 'long-interval-data'
+       }
+     } else if (event.cat_activity === 'Poop') {
+       if (hours > 48) {
+         return 'very-long-interval-data'
+       } else if (hours > 36) {
+         return 'long-interval-data'
+       }
+     }
+   } else if (event.cat_name === 'Sydney') {
+     if (event.cat_activity === 'Pee') {
+       if (hours > 24) {
+         return 'very-long-interval-data'
+       } else if (hours > 16) {
+         return 'long-interval-data'
+       }
+     } else if (event.cat_activity === 'Poop') {
+       if (hours > 36) {
+         return 'very-long-interval-data'
+       } else if (hours > 24) {
+         return 'long-interval-data'
+       }
+     }
+   }
+   
+   return 'notacat-data'
+ }
+ 
  function normalizeElapsedTime(elapsed) {
    var spaceIndex = elapsed.search(' ')
    
-   if (-1 == spaceIndex) {
+   if (-1 === spaceIndex) {
      return elapsed
    }
 
@@ -96,7 +135,31 @@ export default function App() {
    var newElapsed = dayCount.toString()
    newElapsed += parse.substring(hourIndex)
    
+   var dotIndex = newElapsed.search('\\.')
+   if (dotIndex !== -1) {
+     newElapsed = newElapsed.substring(0, dotIndex)
+   }
+   
    return newElapsed
+ }
+ 
+ function stripDecimal(inVal) {
+   var outVal = inVal
+   var dotIndex = outVal.search('\\.')
+   if (dotIndex !== -1) {
+     outVal = outVal.substring(0, dotIndex)
+   }
+   
+   return outVal
+ }
+ 
+ async function getCurrent() {
+   var catUrl = process.env.REACT_APP_API_HOST + '/api/cats/current'
+
+   const response = await fetch(catUrl);
+   const data = await response.json();
+
+   setCurrentEvents(data.events)      
  }
 
  async function getEvents() {
@@ -134,6 +197,7 @@ export default function App() {
  
  useEffect(() => {
    getEvents();
+   getCurrent();
 }, [endTime, beginTime, nameOptions, namesRef.current, activitiesRef.current]);
  
  useEffect(() => {
@@ -183,6 +247,18 @@ export default function App() {
    <div className="App">
      <h1>Cat Stuff</h1>
      <table width="360">
+     <tbody>
+         {
+         currentEvents.map( (currentEvent,key) =>
+         <tr key={key}>
+             <td className={getCurrentElapsedStyleName(currentEvent) }>{currentEvent.cat_name} last recorded {currentEvent.cat_activity} at {currentEvent.human_time} ({stripDecimal(currentEvent.elapsed)} ago) </td>
+         </tr>
+         )
+       }
+    </tbody>
+    </table>
+     <table width="360">
+     <tbody>
      <tr>
        Names: <Multiselect name="targetNames" options={nameOptions} ref={namesRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={nameOptions} />
      </tr>
@@ -195,6 +271,7 @@ export default function App() {
      <tr>
       To: <DateTimePicker name="endTime" value={endTime } onChange={setEndTime } />
     </tr>
+    </tbody>
     </table>
      <table>
        <thead>
@@ -220,6 +297,7 @@ export default function App() {
        }
        </tbody>	
      </table>
+     <i>Last synced {new Date().toLocaleString()}</i>
    </div>
  );
 }
