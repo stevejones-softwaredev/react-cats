@@ -1,4 +1,5 @@
 import { React, useEffect, useState, createRef } from "react";
+import prettyMilliseconds from 'pretty-ms';
 import DateTimePicker from 'react-datetime-picker';
 import Multiselect from 'multiselect-react-dropdown';
 import "./styles.css";
@@ -16,6 +17,8 @@ export default function App() {
  const [ activityOptions, setActivityOptions ] = useState([])
  const [ beginTime, setBeginTime ] = useState(initBeginTime)
  const [ endTime, setEndTime ] = useState(new Date())
+ const [ currentTime, setCurrentTime] = useState(new Date());
+ const [ syncTime, setSyncTime] = useState(new Date());
  
  const namesRef = createRef();
  const activitiesRef = createRef();
@@ -43,7 +46,6 @@ export default function App() {
  function getElapsedStyleName(event) {
    var hourTime = normalizeElapsedTime(event.elapsed)
    var hours = parseInt(hourTime.substring(0, hourTime.search(':')))
-   console.log("Elapsed: " + event.elapsed + " has hour count " + hours)
 
    if (event.cat_name === 'Savi') {
      if (event.cat_activity === 'Pee') {
@@ -82,7 +84,6 @@ export default function App() {
  function getCurrentElapsedStyleName(event) {
    var hourTime = normalizeElapsedTime(event.elapsed)
    var hours = parseInt(hourTime.substring(0, hourTime.search(':')))
-   console.log("Elapsed: " + event.elapsed + " has hour count " + hours)
 
    if (event.cat_name === 'Savi') {
      if (event.cat_activity === 'Pee') {
@@ -153,6 +154,13 @@ export default function App() {
    return outVal
  }
  
+ function timeDiffFromCurrent(event_ts) {
+   var eventTime = new Date(event_ts * 1000)
+   var diff = (Date.now() - eventTime)
+   
+   return prettyMilliseconds(diff, {secondsDecimalDigits: 0})
+ }
+ 
  async function getCurrent() {
    var catUrl = process.env.REACT_APP_API_HOST + '/api/cats/current'
 
@@ -203,7 +211,58 @@ export default function App() {
  useEffect(() => {
    const fetchNames = async () => {
  
-       console.log(process.env.REACT_APP_API_HOST)
+         const response = await fetch(
+            process.env.REACT_APP_API_HOST + '/api/cats/list');
+         const data = await response.json();
+          
+          let nameOptions = [];
+          
+          data.names.forEach(function(arrayItem){
+            var nameOption = {};
+            nameOption.name = arrayItem;
+            nameOptions.push(nameOption);
+          });
+
+          setNameOptions(nameOptions)      
+   }
+ 
+   const fetchActivities = async () => {
+ 
+       const response = await fetch(
+          process.env.REACT_APP_API_HOST + '/api/cats/activity');
+          const data = await response.json();
+          
+          let activityOptions = [];
+          
+          data.names.forEach(function(arrayItem){
+            if (arrayItem !== "") {
+              var activityOption = {};
+              activityOption.name = arrayItem;
+              activityOptions.push(activityOption);
+            }
+          });
+
+          setActivityOptions(activityOptions)      
+   }
+ 
+   // Call the function
+   fetchNames();
+   fetchActivities();
+   setSyncTime(new Date())
+}, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+   const fetchNames = async () => {
+ 
        const response = await fetch(
           process.env.REACT_APP_API_HOST + '/api/cats/list');
           const data = await response.json();
@@ -239,9 +298,13 @@ export default function App() {
    }
  
    // Call the function
-   fetchNames();
-   fetchActivities();
-}, []);
+     fetchNames();
+     fetchActivities();
+     setSyncTime(new Date())
+    }, 60000);
+
+    return () => clearInterval(refreshInterval);
+  }, []);
 
  return (
    <div className="App">
@@ -251,7 +314,7 @@ export default function App() {
          {
          currentEvents.map( (currentEvent,key) =>
          <tr key={key}>
-             <td className={getCurrentElapsedStyleName(currentEvent) }>{currentEvent.cat_name} last recorded {currentEvent.cat_activity} at {currentEvent.human_time} ({stripDecimal(currentEvent.elapsed)} ago) </td>
+             <td className={getCurrentElapsedStyleName(currentEvent) }>{currentEvent.cat_name} last recorded {currentEvent.cat_activity} at {currentEvent.human_time} ({timeDiffFromCurrent(stripDecimal(currentEvent.event_ts))} ago) </td>
          </tr>
          )
        }
@@ -297,7 +360,7 @@ export default function App() {
        }
        </tbody>	
      </table>
-     <i>Last synced {new Date().toLocaleString()}</i>
+     <i>Last synced {syncTime.toLocaleString()}</i>
    </div>
  );
 }
