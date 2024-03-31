@@ -11,6 +11,7 @@ export default function App() {
  var initBeginTime = new Date()
  initBeginTime.setHours(initBeginTime.getHours() - 48)
  
+ const { parse } = require("date-fns");
  const [ catEvents, setCatEvents ] = useState([])
  const [ currentEvents, setCurrentEvents ] = useState([])
  const [ nameOptions, setNameOptions ] = useState([])
@@ -154,9 +155,10 @@ export default function App() {
    return outVal
  }
  
- function timeDiffFromCurrent(event_ts) {
-   var eventTime = new Date(event_ts * 1000)
-   var diff = (Date.now() - eventTime)
+ function timeDiffFromCurrent(human_time) {
+   var trunc = human_time.lastIndexOf(' ')
+   var parsedDate = parse(human_time.substr(0, trunc), 'EEEE, d-MMM-yy HH:mm:ss', new Date())
+   var diff = (Date.now() - parsedDate)
    
    return prettyMilliseconds(diff, {secondsDecimalDigits: 0})
  }
@@ -210,7 +212,6 @@ export default function App() {
  
  useEffect(() => {
    const fetchNames = async () => {
- 
          const response = await fetch(
             process.env.REACT_APP_API_HOST + '/api/cats/list');
          const data = await response.json();
@@ -270,9 +271,11 @@ export default function App() {
           let nameOptions = [];
           
           data.names.forEach(function(arrayItem){
-            var nameOption = {};
-            nameOption.name = arrayItem;
-            nameOptions.push(nameOption);
+            if ((arrayItem !== "") && (arrayItem != 'NotACat')) {
+              var nameOption = {};
+              nameOption.name = arrayItem;
+              nameOptions.push(nameOption);
+            }
           });
 
           setNameOptions(nameOptions)      
@@ -287,7 +290,7 @@ export default function App() {
           let activityOptions = [];
           
           data.names.forEach(function(arrayItem){
-            if (arrayItem !== "") {
+            if ((arrayItem !== "") && (arrayItem != 'Neither')) {
               var activityOption = {};
               activityOption.name = arrayItem;
               activityOptions.push(activityOption);
@@ -314,7 +317,7 @@ export default function App() {
          {
          currentEvents.map( (currentEvent,key) =>
          <tr key={key}>
-             <td className={getCurrentElapsedStyleName(currentEvent) }>{currentEvent.cat_name} last recorded {currentEvent.cat_activity} at {currentEvent.human_time} ({timeDiffFromCurrent(stripDecimal(currentEvent.event_ts))} ago) </td>
+             <td className={getCurrentElapsedStyleName(currentEvent) }>{currentEvent.cat_name} last recorded {currentEvent.cat_activity} at {currentEvent.human_time} ({timeDiffFromCurrent(currentEvent.human_time)} ago) </td>
          </tr>
          )
        }
@@ -323,10 +326,10 @@ export default function App() {
      <table width="360">
      <tbody>
      <tr>
-       Names: <Multiselect name="targetNames" options={nameOptions} ref={namesRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={nameOptions} />
+       Names: <Multiselect id="names" name="targetNames" options={nameOptions} ref={namesRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={nameOptions} />
      </tr>
      <tr>
-       Activity: <Multiselect name="targetActivies" options={activityOptions} ref={activitiesRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={activityOptions} />
+       Activity: <Multiselect id="activities" name="targetActivies" options={activityOptions} ref={activitiesRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={activityOptions} />
      </tr>
      <tr>
       From: <DateTimePicker name="beginTime" value={beginTime } onChange={setBeginTime } />
