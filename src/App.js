@@ -21,8 +21,14 @@ export default function App() {
  const [ currentTime, setCurrentTime] = useState(new Date());
  const [ syncTime, setSyncTime] = useState(new Date());
  
+ const severityArray = [
+   {key: "ok", display: "OK"},
+   {key: "warn", display: "Warn"},
+   {key: "danger", display: "Danger"}]
+ 
  const namesRef = createRef();
  const activitiesRef = createRef();
+ const severitiesRef = createRef();
  
  function getActivityIcon(activity) {
    if (activity === 'Poop') {
@@ -45,41 +51,18 @@ export default function App() {
  }
  
  function getElapsedStyleName(event) {
-   var hourTime = normalizeElapsedTime(event.elapsed)
-   var hours = parseInt(hourTime.substring(0, hourTime.search(':')))
-
-   if (event.cat_name === 'Savi') {
-     if (event.cat_activity === 'Pee') {
-       if (hours > 24) {
-         return 'very-long-interval-data'
-       } else if (hours > 16) {
-         return 'long-interval-data'
-       }
-     } else if (event.cat_activity === 'Poop') {
-       if (hours > 48) {
-         return 'very-long-interval-data'
-       } else if (hours > 36) {
-         return 'long-interval-data'
-       }
-     }
+   if (event.status == 'warn') {
+     return 'long-interval-data'
+   } else if (event.status == 'danger') {
+     return 'very-long-interval-data'
+   }
+   else if (event.cat_name === 'Savi') {
      return 'savi-data'
    } else if (event.cat_name === 'Sydney') {
-     if (event.cat_activity === 'Pee') {
-       if (hours > 24) {
-         return 'very-long-interval-data'
-       } else if (hours > 16) {
-         return 'long-interval-data'
-       }
-     } else if (event.cat_activity === 'Poop') {
-       if (hours > 36) {
-         return 'very-long-interval-data'
-       } else if (hours > 24) {
-         return 'long-interval-data'
-       }
-     }
-     return 'sydney-data'
-   } else
+       return 'sydney-data'
+   } else {
      return 'notacat-data'
+   }
  }
  
  function getCurrentElapsedStyleName(event) {
@@ -177,6 +160,7 @@ export default function App() {
 
    var namesString = ""
    var activitiesString = ""
+   var severitiesString = ""
    namesRef.current.getSelectedItems().forEach(function(arrayItem){
      if (namesString.length !== 0) {
        namesString += ","
@@ -199,6 +183,17 @@ export default function App() {
      catUrl += "&activity=" + activitiesString
    }
 
+   severitiesRef.current.getSelectedItems().forEach(function(arrayItem){
+     if (severitiesString.length !== 0) {
+       severitiesString += ","
+     }
+     severitiesString += arrayItem.key
+   });
+
+   if (severitiesString.length !== 0) {
+     catUrl += "&severity=" + severitiesString
+   }
+
    const response = await fetch(catUrl);
    const data = await response.json();
 
@@ -208,7 +203,7 @@ export default function App() {
  useEffect(() => {
    getEvents();
    getCurrent();
-}, [endTime, beginTime, nameOptions, namesRef.current, activitiesRef.current]);
+}, [endTime, beginTime, nameOptions, namesRef.current, activitiesRef.current, severitiesRef.current]);
  
  useEffect(() => {
    const fetchNames = async () => {
@@ -330,6 +325,9 @@ export default function App() {
      </tr>
      <tr>
        Activity: <Multiselect id="activities" name="targetActivies" options={activityOptions} ref={activitiesRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={activityOptions} />
+     </tr>
+     <tr>
+       Severity: <Multiselect id="severity" name="targetSeverity" options={severityArray} displayValue="display" ref={severitiesRef} onSelect={getEvents } onRemove={getEvents }  selectedValues={severityArray} />
      </tr>
      <tr>
       From: <DateTimePicker name="beginTime" value={beginTime } onChange={setBeginTime } />
