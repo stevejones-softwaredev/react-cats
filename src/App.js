@@ -2,6 +2,7 @@ import { React, useEffect, useState, createRef } from "react";
 import prettyMilliseconds from 'pretty-ms';
 import DateTimePicker from 'react-datetime-picker';
 import Multiselect from 'multiselect-react-dropdown';
+import EditableText from './EditableText.js';
 import "./styles.css";
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
@@ -11,6 +12,7 @@ export default function App() {
  var initBeginTime = new Date()
  initBeginTime.setHours(initBeginTime.getHours() - 48)
  
+ const sleepNow = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
  const { parse } = require("date-fns");
  const [ catEvents, setCatEvents ] = useState([])
  const [ currentEvents, setCurrentEvents ] = useState([])
@@ -153,6 +155,25 @@ export default function App() {
    const data = await response.json();
 
    setCurrentEvents(data.events)      
+ }
+
+ async function onSetComment(comment, event) {
+   var updateUrl = process.env.REACT_APP_API_HOST + '/api/cats/update/' + event.event_ts
+   
+   event.Comment = comment
+   console.log(event)
+   
+   var requestBody = JSON.stringify(event)
+   console.log(requestBody)
+   const response = await fetch(updateUrl,
+     {
+       method: 'PUT',
+       body: requestBody
+     }
+   );
+
+//   await sleepNow(1000)
+//   getEvents();
  }
 
  async function getEvents() {
@@ -345,6 +366,7 @@ export default function App() {
            <th>Activity</th>
            <th>Location</th>
            <th>Elapsed</th>
+           <th className="notes-th">Notes</th>
          </tr>   
        </thead>   
        <tbody>
@@ -356,6 +378,7 @@ export default function App() {
              <td className={getClassName(catEvent.cat_name) }><a target="top" href={catEvent.image_url }>{getActivityIcon(catEvent.cat_activity)}</a></td>
              <td className={getClassName(catEvent.cat_name) }>{catEvent.location }</td>
              <td className={getElapsedStyleName(catEvent) }>{normalizeElapsedTime(catEvent.elapsed) }</td>
+             <td className={getClassName(catEvent.cat_name)}><EditableText backGroundColor="orange" textColor="white" initialText={catEvent.comment} context={catEvent } onEditComplete={onSetComment } /></td>
          </tr>
          )
        }

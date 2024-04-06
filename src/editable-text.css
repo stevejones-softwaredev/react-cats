@@ -1,0 +1,25 @@
+.plain-display {
+  text-overflow: ellipsis;
+  cursor: pointer;
+  overflow: hidden;
+  width: 80;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.notes-display {
+  text-overflow: ellipsis;
+  cursor: pointer;
+  overflow: hidden;
+  width: 130px;
+  min-width: 130px;
+  min-height: 18px;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.notes-input {
+  width: 130px;
+  min-width: 130px;
+  min-height: 18px;
+}
