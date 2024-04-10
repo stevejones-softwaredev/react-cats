@@ -3,6 +3,7 @@ import prettyMilliseconds from 'pretty-ms';
 import DateTimePicker from 'react-datetime-picker';
 import Multiselect from 'multiselect-react-dropdown';
 import EditableText from './EditableText.js';
+import BoundCheckbox from './BoundCheckbox.js';
 import "./styles.css";
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
@@ -104,6 +105,16 @@ export default function App() {
    return 'notacat-data'
  }
  
+ function formatCurrentElapsedTime(elapsed) {
+   var sections = elapsed.split(":")
+   if (sections.length == 4) {
+     var hours = Number(sections[1]) + (24 * sections[0])
+     return (hours + ":" + sections[2] + ":" + sections[3])
+   }
+
+   return elapsed;
+ }
+ 
  function normalizeElapsedTime(elapsed) {
    var spaceIndex = elapsed.search(' ')
    
@@ -145,7 +156,7 @@ export default function App() {
    var parsedDate = parse(human_time.substr(0, trunc), 'EEEE, d-MMM-yy HH:mm:ss', new Date())
    var diff = (Date.now() - parsedDate)
    
-   return prettyMilliseconds(diff, {secondsDecimalDigits: 0})
+   return prettyMilliseconds(diff, {secondsDecimalDigits: 0, colonNotation: true})
  }
  
  async function getCurrent() {
@@ -158,10 +169,17 @@ export default function App() {
  }
 
  async function onSetComment(comment, event) {
+   event.comment = comment
+   patchRecord(event)   
+ }
+ 
+ async function onSetRaked(raked, event) {
+   event.raked = !raked
+   patchRecord(event)   
+ }
+ 
+ async function patchRecord(event) {
    var updateUrl = process.env.REACT_APP_API_HOST + '/api/cats/update/' + event.event_ts
-   
-   event.Comment = comment
-   console.log(event)
    
    var requestBody = JSON.stringify(event)
    console.log(requestBody)
@@ -333,7 +351,7 @@ export default function App() {
          {
          currentEvents.map( (currentEvent,key) =>
          <tr key={key}>
-             <td className={getCurrentElapsedStyleName(currentEvent) }>{currentEvent.cat_name} last recorded {currentEvent.cat_activity} at {currentEvent.human_time} ({timeDiffFromCurrent(currentEvent.human_time)} ago) </td>
+             <td className={getCurrentElapsedStyleName(currentEvent) }>{currentEvent.cat_name} last recorded {currentEvent.cat_activity} at {currentEvent.human_time} ({formatCurrentElapsedTime(timeDiffFromCurrent(currentEvent.human_time))} ago) </td>
          </tr>
          )
        }
@@ -367,6 +385,7 @@ export default function App() {
            <th>Location</th>
            <th>Elapsed</th>
            <th className="notes-th">Notes</th>
+           <th>🗑️</th>
          </tr>   
        </thead>   
        <tbody>
@@ -379,6 +398,7 @@ export default function App() {
              <td className={getClassName(catEvent.cat_name) }>{catEvent.location }</td>
              <td className={getElapsedStyleName(catEvent) }>{normalizeElapsedTime(catEvent.elapsed) }</td>
              <td className={getClassName(catEvent.cat_name)}><EditableText backGroundColor="orange" textColor="white" initialText={catEvent.comment} context={catEvent } onEditComplete={onSetComment } /></td>
+             <td className={getClassName(catEvent.cat_name) }><BoundCheckbox backGroundColor="orange" textColor="white" initialState={catEvent.raked} context={catEvent } onChangeComplete={onSetRaked } /></td>
          </tr>
          )
        }
