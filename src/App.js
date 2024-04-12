@@ -112,7 +112,7 @@ export default function App() {
    } else if (sections.length === 2) {
      return ("00:" + elapsed)
    } else if (sections.length === 1) {
-     return ("00:00" + elapsed)
+     return ("00:00:" + elapsed)
    }
 
    return elapsed;
