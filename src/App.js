@@ -13,7 +13,6 @@ export default function App() {
  var initBeginTime = new Date()
  initBeginTime.setHours(initBeginTime.getHours() - 48)
  
- const sleepNow = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
  const { parse } = require("date-fns");
  const [ catEvents, setCatEvents ] = useState([])
  const [ currentEvents, setCurrentEvents ] = useState([])
@@ -54,9 +53,9 @@ export default function App() {
  }
  
  function getElapsedStyleName(event) {
-   if (event.status == 'warn') {
+   if (event.status === 'warn') {
      return 'long-interval-data'
-   } else if (event.status == 'danger') {
+   } else if (event.status === 'danger') {
      return 'very-long-interval-data'
    }
    else if (event.cat_name === 'Savi') {
@@ -107,9 +106,13 @@ export default function App() {
  
  function formatCurrentElapsedTime(elapsed) {
    var sections = elapsed.split(":")
-   if (sections.length == 4) {
+   if (sections.length === 4) {
      var hours = Number(sections[1]) + (24 * sections[0])
      return (hours + ":" + sections[2] + ":" + sections[3])
+   } else if (sections.length === 2) {
+     return ("00:" + elapsed)
+   } else if (sections.length === 1) {
+     return ("00:00" + elapsed)
    }
 
    return elapsed;
@@ -139,16 +142,6 @@ export default function App() {
    }
    
    return newElapsed
- }
- 
- function stripDecimal(inVal) {
-   var outVal = inVal
-   var dotIndex = outVal.search('\\.')
-   if (dotIndex !== -1) {
-     outVal = outVal.substring(0, dotIndex)
-   }
-   
-   return outVal
  }
  
  function timeDiffFromCurrent(human_time) {
@@ -183,15 +176,12 @@ export default function App() {
    
    var requestBody = JSON.stringify(event)
    console.log(requestBody)
-   const response = await fetch(updateUrl,
+   await fetch(updateUrl,
      {
        method: 'PUT',
        body: requestBody
      }
    );
-
-//   await sleepNow(1000)
-//   getEvents();
  }
 
  async function getEvents() {
@@ -305,7 +295,7 @@ export default function App() {
           let nameOptions = [];
           
           data.names.forEach(function(arrayItem){
-            if ((arrayItem !== "") && (arrayItem != 'NotACat')) {
+            if ((arrayItem !== "") && (arrayItem !== 'NotACat')) {
               var nameOption = {};
               nameOption.name = arrayItem;
               nameOptions.push(nameOption);
@@ -324,7 +314,7 @@ export default function App() {
           let activityOptions = [];
           
           data.names.forEach(function(arrayItem){
-            if ((arrayItem !== "") && (arrayItem != 'Neither')) {
+            if ((arrayItem !== "") && (arrayItem !== 'Neither')) {
               var activityOption = {};
               activityOption.name = arrayItem;
               activityOptions.push(activityOption);
