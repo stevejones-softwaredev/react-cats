@@ -14,6 +14,7 @@ const BoundCheckbox = ({ backGroundColor, initialState, context, onChangeComplet
     <div>
       <span width="130" >
         <input
+          disabled="true"
           type="checkbox"
           checked={checked}
           onChange={handleChange}

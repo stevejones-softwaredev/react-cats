@@ -161,29 +161,6 @@ export default function App() {
    setCurrentEvents(data.events)      
  }
 
- async function onSetComment(comment, event) {
-   event.comment = comment
-   patchRecord(event)   
- }
- 
- async function onSetRaked(raked, event) {
-   event.raked = !raked
-   patchRecord(event)   
- }
- 
- async function patchRecord(event) {
-   var updateUrl = process.env.REACT_APP_API_HOST + '/api/cats/update/' + event.event_ts
-   
-   var requestBody = JSON.stringify(event)
-   console.log(requestBody)
-   await fetch(updateUrl,
-     {
-       method: 'PUT',
-       body: requestBody
-     }
-   );
- }
-
  async function getEvents() {
    var catUrl = process.env.REACT_APP_API_HOST + '/api/cats/events?beginTime=' + (beginTime.valueOf()/1000).toFixed(0) + '&endTime=' + (endTime.valueOf()/1000).toFixed(0)
 
@@ -387,8 +364,8 @@ export default function App() {
              <td className={getClassName(catEvent.cat_name) }><a target="top" href={catEvent.image_url }>{getActivityIcon(catEvent.cat_activity)}</a></td>
              <td className={getClassName(catEvent.cat_name) }>{catEvent.location }</td>
              <td className={getElapsedStyleName(catEvent) }>{normalizeElapsedTime(catEvent.elapsed) }</td>
-             <td className={getClassName(catEvent.cat_name)}><EditableText backGroundColor="orange" textColor="white" initialText={catEvent.comment} context={catEvent } onEditComplete={onSetComment } /></td>
-             <td className={getClassName(catEvent.cat_name) }><BoundCheckbox backGroundColor="orange" textColor="white" initialState={catEvent.raked} context={catEvent } onChangeComplete={onSetRaked } /></td>
+             <td className={getClassName(catEvent.cat_name)}><EditableText backGroundColor="orange" textColor="white" initialText={catEvent.comment} context={catEvent } /></td>
+             <td className={getClassName(catEvent.cat_name) }><BoundCheckbox backGroundColor="orange" textColor="white" initialState={catEvent.raked} context={catEvent }  /></td>
          </tr>
          )
        }

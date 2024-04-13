@@ -38,17 +38,7 @@ const EditableText = ({ backGroundColor, textColor, initialText, context, onEdit
 
   return (
     <div onClick={handleClick} >
-      {isEditing ? (
-        <span width="130" >
-        <input
-          autoFocus
-          className="notes-input"
-          value={text}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyPress}
-        /></span>
-      ) : (
+      { (
         <span width="130" style={{ backgroundColor: {backGroundColor}, color: {textColor} }} className="notes-display" title={text} >{text}</span>
       )}
     </div>
