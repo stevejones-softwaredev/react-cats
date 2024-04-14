@@ -3,15 +3,16 @@ import React, { useState } from 'react';
 import "./editable-text.css";
 
 const EditableText = ({ backGroundColor, textColor, initialText, context, onEditComplete }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [baseText, setBaseText] = useState(initialText);
-  const [text, setText] = useState(initialText);
+  const [isEditing, setIsEditing] = useState(false)
+  const [baseText, setBaseText] = useState(initialText)
+  const [text, setText] = useState(initialText)
 
   const handleClick = () => {
     setIsEditing(true);
   };
 
   const handleChange = (event) => {
+    console.log(text)
     setText(event.target.value);
   };
 
@@ -24,8 +25,7 @@ const EditableText = ({ backGroundColor, textColor, initialText, context, onEdit
   const handleKeyPress = e => {
     if (e.key === "Enter") {
       handleBlur();
-    } else if (e.key == 'Escape') {
-      console.log("Escape pressed")
+    } else if (e.key === 'Escape') {
       revert()
     }
   }
@@ -33,7 +33,6 @@ const EditableText = ({ backGroundColor, textColor, initialText, context, onEdit
   function revert() {
     setIsEditing(false);
     setText(baseText)
-    console.log("Text set to " + baseText)
   }
 
   return (
@@ -49,7 +48,7 @@ const EditableText = ({ backGroundColor, textColor, initialText, context, onEdit
           onKeyDown={handleKeyPress}
         /></span>
       ) : (
-        <span width="130" style={{ backgroundColor: {backGroundColor}, color: {textColor} }} className="notes-display" title={text} >{text}</span>
+        <span width="130" style={{ backgroundColor: {backGroundColor}, color: {textColor} }} className="notes-display" title={initialText} >{initialText}</span>
       )}
     </div>
   );
