@@ -17,6 +17,7 @@ export default function App() {
  const [ catEvents, setCatEvents ] = useState([])
  const [ currentEvents, setCurrentEvents ] = useState([])
  const [ nameOptions, setNameOptions ] = useState([])
+ const [ locationOptions, setLocationOptions ] = useState([])
  const [ activityOptions, setActivityOptions ] = useState([])
  const [ beginTime, setBeginTime ] = useState(initBeginTime)
  const [ endTime, setEndTime ] = useState(new Date())
@@ -28,9 +29,10 @@ export default function App() {
    {key: "warn", display: "Warn"},
    {key: "danger", display: "Danger"}]
  
- const namesRef = createRef();
- const activitiesRef = createRef();
- const severitiesRef = createRef();
+ const namesRef = createRef()
+ const locationsRef = createRef()
+ const activitiesRef = createRef()
+ const severitiesRef = createRef()
  
  function getActivityIcon(activity) {
    if (activity === 'Poop') {
@@ -188,6 +190,7 @@ export default function App() {
    var catUrl = process.env.REACT_APP_API_HOST + '/api/cats/events?beginTime=' + (beginTime.valueOf()/1000).toFixed(0) + '&endTime=' + (endTime.valueOf()/1000).toFixed(0)
 
    var namesString = ""
+   var locationsString = ""
    var activitiesString = ""
    var severitiesString = ""
    namesRef.current.getSelectedItems().forEach(function(arrayItem){
@@ -199,6 +202,17 @@ export default function App() {
 
    if (namesString.length !== 0) {
      catUrl += "&names=" + namesString
+   }
+ 
+   locationsRef.current.getSelectedItems().forEach(function(arrayItem){
+     if (locationsString.length !== 0) {
+       locationsString += ","
+     }
+     locationsString += arrayItem.name
+   });
+
+   if (locationsString.length !== 0) {
+     catUrl += "&locations=" + locationsString
    }
  
    activitiesRef.current.getSelectedItems().forEach(function(arrayItem){
@@ -232,7 +246,7 @@ export default function App() {
  useEffect(() => {
    getEvents();
    getCurrent();
-}, [endTime, beginTime, nameOptions, namesRef.current, activitiesRef.current, severitiesRef.current]);
+}, [endTime, beginTime, nameOptions, namesRef.current, locationsRef.current, activitiesRef.current, severitiesRef.current]);
  
  useEffect(() => {
    const fetchNames = async () => {
@@ -248,11 +262,28 @@ export default function App() {
             nameOptions.push(nameOption);
           });
 
-          setNameOptions(nameOptions)      
+          setNameOptions(nameOptions)
+   }
+
+   const fetchLocations = async() => {
+       const response = await fetch(
+          process.env.REACT_APP_API_HOST + '/api/cats/locations');
+          const data = await response.json();
+
+          let locationOptions = [];
+
+          data.locations.forEach(function(arrayItem){
+            if (arrayItem !== "") {
+              var locationOption = {};
+              locationOption.name = arrayItem;
+              locationOptions.push(locationOption);
+            }
+          });
+
+          setLocationOptions(locationOptions)      
    }
  
-   const fetchActivities = async () => {
- 
+   const fetchActivities = async () => { 
        const response = await fetch(
           process.env.REACT_APP_API_HOST + '/api/cats/activity');
           const data = await response.json();
@@ -271,8 +302,9 @@ export default function App() {
    }
  
    // Call the function
-   fetchNames();
-   fetchActivities();
+   fetchNames()
+   fetchLocations()
+   fetchActivities()
    setSyncTime(new Date())
 }, []);
 
@@ -305,8 +337,25 @@ export default function App() {
           setNameOptions(nameOptions)      
    }
  
-   const fetchActivities = async () => {
+   const fetchLocations = async() => {
+       const response = await fetch(
+          process.env.REACT_APP_API_HOST + '/api/cats/locations');
+          const data = await response.json();
+
+          let locationOptions = [];
+
+          data.locations.forEach(function(arrayItem){
+            if (arrayItem !== "") {
+              var locationOption = {};
+              locationOption.name = arrayItem;
+              locationOptions.push(locationOption);
+            }
+          });
+
+          setLocationOptions(locationOptions)
+   }
  
+   const fetchActivities = async () => {
        const response = await fetch(
           process.env.REACT_APP_API_HOST + '/api/cats/activity');
           const data = await response.json();
@@ -325,8 +374,9 @@ export default function App() {
    }
  
    // Call the function
-     fetchNames();
-     fetchActivities();
+     fetchNames()
+     fetchLocations()
+     fetchActivities()
      setSyncTime(new Date())
     }, 60000);
 
@@ -351,6 +401,9 @@ export default function App() {
      <tbody>
      <tr>
        Names: <Multiselect id="names" name="targetNames" options={nameOptions} ref={namesRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={nameOptions} />
+     </tr>
+     <tr>
+       Locations: <Multiselect id="locations" name="targetLocations" options={locationOptions} ref={locationsRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={locationOptions} />
      </tr>
      <tr>
        Activity: <Multiselect id="activities" name="targetActivies" options={activityOptions} ref={activitiesRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={activityOptions} />
