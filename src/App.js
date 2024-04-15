@@ -70,40 +70,13 @@ export default function App() {
  }
  
  function getCurrentElapsedStyleName(event) {
-   var hourTime = normalizeElapsedTime(event.elapsed)
-   var hours = parseInt(hourTime.substring(0, hourTime.search(':')))
-
-   if (event.cat_name === 'Savi') {
-     if (event.cat_activity === 'Pee') {
-       if (hours > 24) {
-         return 'very-long-interval-data'
-       } else if (hours > 16) {
-         return 'long-interval-data'
-       }
-     } else if (event.cat_activity === 'Poop') {
-       if (hours > 48) {
-         return 'very-long-interval-data'
-       } else if (hours > 36) {
-         return 'long-interval-data'
-       }
-     }
-   } else if (event.cat_name === 'Sydney') {
-     if (event.cat_activity === 'Pee') {
-       if (hours > 24) {
-         return 'very-long-interval-data'
-       } else if (hours > 16) {
-         return 'long-interval-data'
-       }
-     } else if (event.cat_activity === 'Poop') {
-       if (hours > 36) {
-         return 'very-long-interval-data'
-       } else if (hours > 24) {
-         return 'long-interval-data'
-       }
-     }
+   if (event.status === 'warn') {
+     return 'long-interval-data'
+   } else if (event.status === 'danger') {
+     return 'very-long-interval-data'
+   } else {
+     return 'notacat-data'
    }
-   
-   return 'notacat-data'
  }
  
  function formatCurrentElapsedTime(elapsed) {
