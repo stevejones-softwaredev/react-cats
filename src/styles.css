@@ -67,6 +67,18 @@ td {
   color: white;
 }
 
+.even-data {
+  text-align: center;
+  padding: 5px 10px;
+  background-color:rgb(206, 229, 236)
+}
+
+.odd-data {
+  text-align: center;
+  padding: 5px 10px;
+  background-color:rgb(122, 171, 250)
+}
+
 a {
   text-decoration: none;
   color: black;

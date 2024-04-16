@@ -54,18 +54,25 @@ export default function App() {
    }
  }
  
+ function getDayStyleName(event) {
+   var trunc = event.human_time.lastIndexOf(' ')
+   var parsedDate = parse(event.human_time.substr(0, trunc), 'EEEE, d-MMM-yy HH:mm:ss', new Date())
+   var dayCount = Math.floor((parsedDate.valueOf() - 14400000) / (60 * 60 * 24 * 1000))
+   if (dayCount % 2 == 0) {
+     return 'even-data'
+   } else {
+     return 'odd-data'
+   }
+ }
+ 
  function getElapsedStyleName(event) {
    if (event.status === 'warn') {
      return 'long-interval-data'
    } else if (event.status === 'danger') {
      return 'very-long-interval-data'
    }
-   else if (event.cat_name === 'Savi') {
-     return 'savi-data'
-   } else if (event.cat_name === 'Sydney') {
-       return 'sydney-data'
-   } else {
-     return 'notacat-data'
+   else  {
+     return getDayStyleName(event)
    }
  }
  
@@ -407,14 +414,14 @@ export default function App() {
        <tbody>
          {
          catEvents.map( (catEvent,key) =>
-         <tr key={key}>
-             <td className={getClassName(catEvent.cat_name) }>{catEvent.human_time }</td>
+         <tr key={key} className={getDayStyleName(catEvent)}>
+             <td >{catEvent.human_time }</td>
              <td className={getClassName(catEvent.cat_name) }>{catEvent.cat_name }</td>
-             <td className={getClassName(catEvent.cat_name) }><a target="top" href={catEvent.image_url }>{getActivityIcon(catEvent.cat_activity)}</a></td>
-             <td className={getClassName(catEvent.cat_name) }>{catEvent.location }</td>
+             <td ><a target="top" href={catEvent.image_url }>{getActivityIcon(catEvent.cat_activity)}</a></td>
+             <td >{catEvent.location }</td>
              <td className={getElapsedStyleName(catEvent) }>{normalizeElapsedTime(catEvent.elapsed) }</td>
-             <td className={getClassName(catEvent.cat_name)}><EditableText backGroundColor="orange" textColor="white" initialText={catEvent.comment} context={catEvent } onEditComplete={onSetComment } /></td>
-             <td className={getClassName(catEvent.cat_name) }><BoundCheckbox backGroundColor="orange" textColor="white" initialState={catEvent.raked} context={catEvent } onChangeComplete={onSetRaked } /></td>
+             <td ><EditableText backGroundColor="orange" textColor="white" initialText={catEvent.comment} context={catEvent } onEditComplete={onSetComment } /></td>
+             <td ><BoundCheckbox backGroundColor="orange" textColor="white" initialState={catEvent.raked} context={catEvent } onChangeComplete={onSetRaked } /></td>
          </tr>
          )
        }
