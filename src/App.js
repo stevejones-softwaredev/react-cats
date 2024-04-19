@@ -56,8 +56,15 @@ export default function App() {
  
  function getDayStyleName(event) {
    var trunc = event.human_time.lastIndexOf(' ')
+   var tz = event.human_time.substr(trunc + 1)
+   var utcOffset
+   if (tz ==='EDT') {
+     utcOffset = 14400000
+   } else if (tz === 'EST') {
+     utcOffset = 18000000
+   }
    var parsedDate = parse(event.human_time.substr(0, trunc), 'EEEE, d-MMM-yy HH:mm:ss', new Date())
-   var dayCount = Math.floor((parsedDate.valueOf() - 14400000) / (60 * 60 * 24 * 1000))
+   var dayCount = Math.floor((parsedDate.valueOf() - utcOffset) / (60 * 60 * 24 * 1000))
    if (dayCount % 2 == 0) {
      return 'even-data'
    } else {
