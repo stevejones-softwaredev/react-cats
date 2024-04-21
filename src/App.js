@@ -397,8 +397,8 @@ export default function App() {
              <td ><a target="top" href={catEvent.image_url }>{getActivityIcon(catEvent.cat_activity)}</a></td>
              <td >{catEvent.location }</td>
              <td className={getElapsedStyleName(catEvent) }>{normalizeElapsedTime(catEvent.elapsed) }</td>
-             <td className={getClassName(catEvent.cat_name)}><EditableText backGroundColor="orange" textColor="white" initialText={catEvent.comment} context={catEvent } /></td>
-             <td className={getClassName(catEvent.cat_name) }><BoundCheckbox backGroundColor="orange" textColor="white" initialState={catEvent.raked} context={catEvent }  /></td>
+             <td ><EditableText backGroundColor="orange" textColor="white" initialText={catEvent.comment} context={catEvent } /></td>
+             <td ><BoundCheckbox backGroundColor="orange" textColor="white" initialState={catEvent.raked} context={catEvent }  /></td>
          </tr>
          )
        }

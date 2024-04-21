@@ -1,6 +1,6 @@
 {
   "name": "cat",
-  "homepage": "https://steve-jones.dev/web/cat/",
+  "homepage": "https://steve-jones.dev/web/catdata/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
