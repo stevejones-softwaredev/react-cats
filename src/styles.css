@@ -3,7 +3,6 @@
   text-align: center;
 }
 
-
 table{
   margin: 0 auto;
 }
@@ -32,6 +31,11 @@ td {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+::selection {
+  background: purple;
+  color: white;
 }
 
 .savi-data {

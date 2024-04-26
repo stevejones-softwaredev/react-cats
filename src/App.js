@@ -13,7 +13,7 @@ export default function App() {
  var initBeginTime = new Date()
  initBeginTime.setHours(initBeginTime.getHours() - 48)
  
- const { parse } = require("date-fns");
+ const { parse } = require('date-fns');
  const [ catEvents, setCatEvents ] = useState([])
  const [ currentEvents, setCurrentEvents ] = useState([])
  const [ nameOptions, setNameOptions ] = useState([])
@@ -25,9 +25,9 @@ export default function App() {
  const [ syncTime, setSyncTime] = useState(new Date());
  
  const severityArray = [
-   {key: "ok", display: "OK"},
-   {key: "warn", display: "Warn"},
-   {key: "danger", display: "Danger"}]
+   {key: 'ok', display: 'OK'},
+   {key: 'warn', display: 'Warn'},
+   {key: 'danger', display: 'Danger'}]
  
  const namesRef = createRef()
  const locationsRef = createRef()
@@ -65,7 +65,7 @@ export default function App() {
    }
    var parsedDate = parse(event.human_time.substr(0, trunc), 'EEEE, d-MMM-yy HH:mm:ss', new Date())
    var dayCount = Math.floor((parsedDate.valueOf() - utcOffset) / (60 * 60 * 24 * 1000))
-   if (dayCount % 2 == 0) {
+   if (dayCount % 2 === 0) {
      return 'even-data'
    } else {
      return 'odd-data'
@@ -94,14 +94,14 @@ export default function App() {
  }
  
  function formatCurrentElapsedTime(elapsed) {
-   var sections = elapsed.split(":")
+   var sections = elapsed.split(':')
    if (sections.length === 4) {
      var hours = Number(sections[1]) + (24 * sections[0])
-     return (hours + ":" + sections[2] + ":" + sections[3])
+     return (hours + ':' + sections[2] + ':' + sections[3])
    } else if (sections.length === 2) {
-     return ("00:" + elapsed)
+     return ('00:' + elapsed)
    } else if (sections.length === 1) {
-     return ("00:00:" + elapsed)
+     return ('00:00:' + elapsed)
    }
 
    return elapsed;
@@ -136,7 +136,7 @@ export default function App() {
  function timeDiffFromCurrent(human_time) {
    var trunc = human_time.lastIndexOf(' ')
    var parsedDate = parse(human_time.substr(0, trunc), 'EEEE, d-MMM-yy HH:mm:ss', new Date())
-   var diff = (Date.now() - parsedDate)
+   var diff = (currentTime - parsedDate)
    
    return prettyMilliseconds(diff, {secondsDecimalDigits: 0, colonNotation: true})
  }
@@ -176,52 +176,52 @@ export default function App() {
  async function getEvents() {
    var catUrl = process.env.REACT_APP_API_HOST + '/api/cats/events?beginTime=' + (beginTime.valueOf()/1000).toFixed(0) + '&endTime=' + (endTime.valueOf()/1000).toFixed(0)
 
-   var namesString = ""
-   var locationsString = ""
-   var activitiesString = ""
-   var severitiesString = ""
+   var namesString = ''
+   var locationsString = ''
+   var activitiesString = ''
+   var severitiesString = ''
    namesRef.current.getSelectedItems().forEach(function(arrayItem){
      if (namesString.length !== 0) {
-       namesString += ","
+       namesString += ','
      }
      namesString += arrayItem.name
    });
 
    if (namesString.length !== 0) {
-     catUrl += "&names=" + namesString
+     catUrl += '&names=' + namesString
    }
  
    locationsRef.current.getSelectedItems().forEach(function(arrayItem){
      if (locationsString.length !== 0) {
-       locationsString += ","
+       locationsString += ','
      }
      locationsString += arrayItem.name
    });
 
    if (locationsString.length !== 0) {
-     catUrl += "&locations=" + locationsString
+     catUrl += '&locations=' + locationsString
    }
  
    activitiesRef.current.getSelectedItems().forEach(function(arrayItem){
      if (activitiesString.length !== 0) {
-       activitiesString += ","
+       activitiesString += ','
      }
      activitiesString += arrayItem.name
    });
 
    if (activitiesString.length !== 0) {
-     catUrl += "&activity=" + activitiesString
+     catUrl += '&activity=' + activitiesString
    }
 
    severitiesRef.current.getSelectedItems().forEach(function(arrayItem){
      if (severitiesString.length !== 0) {
-       severitiesString += ","
+       severitiesString += ','
      }
      severitiesString += arrayItem.key
    });
 
    if (severitiesString.length !== 0) {
-     catUrl += "&severity=" + severitiesString
+     catUrl += '&severity=' + severitiesString
    }
 
    const response = await fetch(catUrl);
@@ -260,7 +260,7 @@ export default function App() {
           let locationOptions = [];
 
           data.locations.forEach(function(arrayItem){
-            if (arrayItem !== "") {
+            if (arrayItem !== '') {
               var locationOption = {};
               locationOption.name = arrayItem;
               locationOptions.push(locationOption);
@@ -278,7 +278,7 @@ export default function App() {
           let activityOptions = [];
           
           data.names.forEach(function(arrayItem){
-            if (arrayItem !== "") {
+            if (arrayItem !== '') {
               var activityOption = {};
               activityOption.name = arrayItem;
               activityOptions.push(activityOption);
@@ -297,7 +297,7 @@ export default function App() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTime(new Date());
+      setCurrentTime(new Date())
     }, 1000);
 
     return () => clearInterval(interval);
@@ -314,7 +314,7 @@ export default function App() {
           let nameOptions = [];
           
           data.names.forEach(function(arrayItem){
-            if ((arrayItem !== "") && (arrayItem !== 'NotACat')) {
+            if ((arrayItem !== '') && (arrayItem !== 'NotACat')) {
               var nameOption = {};
               nameOption.name = arrayItem;
               nameOptions.push(nameOption);
@@ -332,7 +332,7 @@ export default function App() {
           let locationOptions = [];
 
           data.locations.forEach(function(arrayItem){
-            if (arrayItem !== "") {
+            if ((arrayItem !== '') && (arrayItem !== 'Neither')) {
               var locationOption = {};
               locationOption.name = arrayItem;
               locationOptions.push(locationOption);
@@ -350,7 +350,7 @@ export default function App() {
           let activityOptions = [];
           
           data.names.forEach(function(arrayItem){
-            if ((arrayItem !== "") && (arrayItem !== 'Neither')) {
+            if ((arrayItem !== '') && (arrayItem !== 'Neither')) {
               var activityOption = {};
               activityOption.name = arrayItem;
               activityOptions.push(activityOption);
