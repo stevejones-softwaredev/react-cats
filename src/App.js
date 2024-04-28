@@ -4,6 +4,7 @@ import DateTimePicker from 'react-datetime-picker';
 import Multiselect from 'multiselect-react-dropdown';
 import EditableText from './EditableText.js';
 import BoundCheckbox from './BoundCheckbox.js';
+import LoginControl from './LoginControl.js';
 import "./styles.css";
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
@@ -23,6 +24,8 @@ export default function App() {
  const [ endTime, setEndTime ] = useState(new Date())
  const [ currentTime, setCurrentTime] = useState(new Date());
  const [ syncTime, setSyncTime] = useState(new Date());
+ const [ authenticated, setAuthenticated] = useState(false);
+ const [ authHeader, setAuthHeader] = useState("");
  
  const severityArray = [
    {key: 'ok', display: 'OK'},
@@ -144,7 +147,7 @@ export default function App() {
  async function getCurrent() {
    var catUrl = process.env.REACT_APP_API_HOST + '/api/cats/current'
 
-   const response = await fetch(catUrl);
+   const response = await fetch(catUrl, { credentials : "include" });
    const data = await response.json();
 
    setCurrentEvents(data.events)      
@@ -160,15 +163,24 @@ export default function App() {
    patchRecord(event)   
  }
  
+ async function onAuthChanged(authenticated, authHeader) {
+   setAuthenticated(authenticated)
+   if (authenticated) {
+     setAuthHeader(authHeader)
+   }
+ }
+ 
  async function patchRecord(event) {
    var updateUrl = process.env.REACT_APP_API_HOST + '/api/cats/update/' + event.event_ts
    
    var requestBody = JSON.stringify(event)
    console.log(requestBody)
+   const headers = { 'Authorization': authHeader };
    await fetch(updateUrl,
      {
        method: 'PUT',
-       body: requestBody
+       body: requestBody,
+       headers: headers
      }
    );
  }
@@ -224,7 +236,7 @@ export default function App() {
      catUrl += '&severity=' + severitiesString
    }
 
-   const response = await fetch(catUrl);
+   const response = await fetch(catUrl, { credentials : "include" });
    const data = await response.json();
 
    setCatEvents(data.events)      
@@ -233,12 +245,12 @@ export default function App() {
  useEffect(() => {
    getEvents();
    getCurrent();
-}, [endTime, beginTime, nameOptions, namesRef.current, locationsRef.current, activitiesRef.current, severitiesRef.current]);
+}, [endTime, beginTime, nameOptions, namesRef.current, locationsRef.current, activitiesRef.current, severitiesRef.current, authenticated]);
  
  useEffect(() => {
    const fetchNames = async () => {
          const response = await fetch(
-            process.env.REACT_APP_API_HOST + '/api/cats/list');
+            process.env.REACT_APP_API_HOST + '/api/cats/list', { credentials : "include" });
          const data = await response.json();
           
           let nameOptions = [];
@@ -254,7 +266,7 @@ export default function App() {
 
    const fetchLocations = async() => {
        const response = await fetch(
-          process.env.REACT_APP_API_HOST + '/api/cats/locations');
+          process.env.REACT_APP_API_HOST + '/api/cats/locations', { credentials : "include" });
           const data = await response.json();
 
           let locationOptions = [];
@@ -267,12 +279,15 @@ export default function App() {
             }
           });
 
+          const headers = await response.headers
+
+          console.log("Location API call response headers: " + response.headers.get('Authorization'));
           setLocationOptions(locationOptions)      
    }
  
    const fetchActivities = async () => { 
        const response = await fetch(
-          process.env.REACT_APP_API_HOST + '/api/cats/activity');
+          process.env.REACT_APP_API_HOST + '/api/cats/activity', { credentials : "include" });
           const data = await response.json();
           
           let activityOptions = [];
@@ -308,7 +323,7 @@ export default function App() {
    const fetchNames = async () => {
  
        const response = await fetch(
-          process.env.REACT_APP_API_HOST + '/api/cats/list');
+          process.env.REACT_APP_API_HOST + '/api/cats/list', { credentials : "include" });
           const data = await response.json();
           
           let nameOptions = [];
@@ -326,7 +341,7 @@ export default function App() {
  
    const fetchLocations = async() => {
        const response = await fetch(
-          process.env.REACT_APP_API_HOST + '/api/cats/locations');
+          process.env.REACT_APP_API_HOST + '/api/cats/locations', { credentials : "include" });
           const data = await response.json();
 
           let locationOptions = [];
@@ -339,12 +354,17 @@ export default function App() {
             }
           });
 
+          const headers = await response.headers
+
+          console.log("Location API call response headers: " + response.headers.get('Authorization'));
+
+          console.log("Setting options");
           setLocationOptions(locationOptions)
    }
  
    const fetchActivities = async () => {
        const response = await fetch(
-          process.env.REACT_APP_API_HOST + '/api/cats/activity');
+          process.env.REACT_APP_API_HOST + '/api/cats/activity', { credentials : "include" });
           const data = await response.json();
           
           let activityOptions = [];
@@ -373,6 +393,7 @@ export default function App() {
  return (
    <div className="App">
      <h1>Cat Stuff</h1>
+     <LoginControl initialState={authenticated} handleAuthChange={onAuthChanged} />
      <table width="360">
      <tbody>
          {
@@ -422,13 +443,13 @@ export default function App() {
          {
          catEvents.map( (catEvent,key) =>
          <tr key={key} className={getDayStyleName(catEvent)}>
-             <td >{catEvent.human_time }</td>
+             <td>{catEvent.human_time }</td>
              <td className={getClassName(catEvent.cat_name) }>{catEvent.cat_name }</td>
-             <td ><a target="top" href={catEvent.image_url }>{getActivityIcon(catEvent.cat_activity)}</a></td>
-             <td >{catEvent.location }</td>
+             <td><a target="top" href={catEvent.image_url }> {getActivityIcon(catEvent.cat_activity)} </a></td>
+             <td>{catEvent.location }</td>
              <td className={getElapsedStyleName(catEvent) }>{normalizeElapsedTime(catEvent.elapsed) }</td>
-             <td ><EditableText backGroundColor="orange" textColor="white" initialText={catEvent.comment} context={catEvent } onEditComplete={onSetComment } /></td>
-             <td ><BoundCheckbox backGroundColor="orange" textColor="white" initialState={catEvent.raked} context={catEvent } onChangeComplete={onSetRaked } /></td>
+             <td><EditableText backGroundColor="orange" textColor="white" initialText={catEvent.comment} context={catEvent } onEditComplete={onSetComment } readOnly={!authenticated } /></td>
+             <td><BoundCheckbox backGroundColor="orange" textColor="white" initialState={catEvent.raked} context={catEvent } onChangeComplete={onSetRaked } readOnly={!authenticated } /></td>
          </tr>
          )
        }

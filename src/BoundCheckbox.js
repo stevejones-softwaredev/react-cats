@@ -1,8 +1,8 @@
 // BoundCheckbox.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "./editable-text.css";
 
-const BoundCheckbox = ({ backGroundColor, initialState, context, onChangeComplete }) => {
+const BoundCheckbox = ({ backGroundColor, initialState, context, onChangeComplete, readOnly }) => {
   const [checked, setChecked] = useState(initialState);
 
   const handleChange = (event) => {
@@ -10,14 +10,29 @@ const BoundCheckbox = ({ backGroundColor, initialState, context, onChangeComplet
     onChangeComplete(checked, context)
   };
 
+  useEffect(() => {
+    console.log("isReadOnly changed: " + readOnly)
+  }, [readOnly])
+
   return (
     <div>
+    {readOnly ? (
       <span width="130" >
         <input
           type="checkbox"
           checked={initialState}
           onChange={handleChange}
-        /></span>
+          disabled />
+        </span>
+      ) : (
+      <span width="130" >
+        <input
+          type="checkbox"
+          checked={initialState}
+          onChange={handleChange}
+          enabled />
+        </span>
+      )}
     </div>
   );
 };

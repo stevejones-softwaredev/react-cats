@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import "./editable-text.css";
 
-const EditableText = ({ backGroundColor, textColor, initialText, context, onEditComplete }) => {
+const EditableText = ({ backGroundColor, textColor, initialText, context, onEditComplete, readOnly }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [baseText, setBaseText] = useState(initialText)
   const [text, setText] = useState(initialText)
@@ -12,7 +12,6 @@ const EditableText = ({ backGroundColor, textColor, initialText, context, onEdit
   };
 
   const handleChange = (event) => {
-    console.log(text)
     setText(event.target.value);
   };
 
@@ -30,6 +29,10 @@ const EditableText = ({ backGroundColor, textColor, initialText, context, onEdit
     }
   }
   
+  function getClassName() {
+    return (readOnly ? "notes-display-readonly" : "notes-display")
+  }
+
   function revert() {
     setIsEditing(false);
     setText(baseText)
@@ -37,7 +40,7 @@ const EditableText = ({ backGroundColor, textColor, initialText, context, onEdit
 
   return (
     <div onClick={handleClick} >
-      {isEditing ? (
+      {(isEditing && !readOnly) ? (
         <span width="130" >
         <input
           autoFocus
@@ -48,7 +51,7 @@ const EditableText = ({ backGroundColor, textColor, initialText, context, onEdit
           onKeyDown={handleKeyPress}
         /></span>
       ) : (
-        <span width="130" style={{ backgroundColor: {backGroundColor}, color: {textColor} }} className="notes-display" title={initialText} >{initialText}</span>
+        <span width="130" style={{ backgroundColor: {backGroundColor}, color: {textColor} }} className={getClassName()} title={initialText} >{initialText}</span>
       )}
     </div>
   );
