@@ -41,7 +41,7 @@ const EditableText = ({ backGroundColor, textColor, initialText, context, onEdit
   return (
     <div onClick={handleClick} >
       {(isEditing && !readOnly) ? (
-        <span width="130" >
+        <span width="90%" >
         <input
           autoFocus
           className="notes-input"
@@ -51,7 +51,7 @@ const EditableText = ({ backGroundColor, textColor, initialText, context, onEdit
           onKeyDown={handleKeyPress}
         /></span>
       ) : (
-        <span width="130" style={{ backgroundColor: {backGroundColor}, color: {textColor} }} className={getClassName()} title={initialText} >{initialText}</span>
+        <span width="90%" style={{ backgroundColor: {backGroundColor}, color: {textColor} }} className={getClassName()} title={initialText} >{initialText}</span>
       )}
     </div>
   );

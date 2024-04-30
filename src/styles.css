@@ -8,6 +8,7 @@ table{
 }
 
 th{
+  overflow: hidden;
   background-color: rgb(68, 109, 109);
   padding:5px 20px;
   color:whitesmoke;
@@ -22,12 +23,13 @@ td {
 .notes-th {
   background-color: rgb(68, 109, 109);
   padding:5px 20px;
+  resize: horizontal;
+  overflow: hidden;
   color:whitesmoke;
   width:140px;
 }
 
 .notes-td {
-  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

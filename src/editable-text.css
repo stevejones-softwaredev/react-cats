@@ -11,8 +11,8 @@
   text-overflow: ellipsis;
   cursor: pointer;
   overflow: hidden;
-  width: 130px;
-  min-width: 130px;
+  width: 90%;
+  min-width: 80px;
   min-height: 18px;
   white-space: nowrap;
   display: inline-block;
@@ -21,15 +21,15 @@
 .notes-display-readonly {
   text-overflow: ellipsis;
   overflow: hidden;
-  width: 130px;
-  min-width: 130px;
+  width: 90%;
+  min-width: 80px;
   min-height: 18px;
   white-space: nowrap;
   display: inline-block;
 }
 
 .notes-input {
-  width: 130px;
-  min-width: 130px;
+  width: 90%;
+  min-width: 80px;
   min-height: 18px;
 }
