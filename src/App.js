@@ -157,6 +157,18 @@ export default function App() {
    event.comment = comment
    patchRecord(event)   
  }
+
+ async function onRefresh(event) {
+   var updateUrl = process.env.REACT_APP_API_HOST + '/api/cats/refresh'
+
+   const headers = { 'Authorization': authHeader };
+   await fetch(updateUrl,
+     {
+       method: 'POST',
+       headers: headers
+     }
+   );
+ }
  
  async function onSetRaked(raked, event) {
    event.raked = !raked
@@ -279,9 +291,6 @@ export default function App() {
             }
           });
 
-          const headers = await response.headers
-
-          console.log("Location API call response headers: " + response.headers.get('Authorization'));
           setLocationOptions(locationOptions)      
    }
  
@@ -354,10 +363,6 @@ export default function App() {
             }
           });
 
-          const headers = await response.headers
-
-          console.log("Location API call response headers: " + response.headers.get('Authorization'));
-
           console.log("Setting options");
           setLocationOptions(locationOptions)
    }
@@ -405,6 +410,7 @@ export default function App() {
        }
     </tbody>
     </table>
+    <input type="button" value="Refresh" onClick={ onRefresh } disabled={ !authenticated} />
      <table width="360">
      <tbody>
      <tr>
