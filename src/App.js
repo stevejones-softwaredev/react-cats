@@ -25,6 +25,7 @@ export default function App() {
  const [ currentTime, setCurrentTime] = useState(new Date());
  const [ syncTime, setSyncTime] = useState(new Date());
  const [ authenticated, setAuthenticated] = useState(false);
+ const [ refreshPending, setRefreshPending] = useState(false);
  const [ authHeader, setAuthHeader] = useState("");
  
  const severityArray = [
@@ -162,12 +163,16 @@ export default function App() {
    var updateUrl = process.env.REACT_APP_API_HOST + '/api/cats/refresh'
 
    const headers = { 'Authorization': authHeader };
+   setRefreshPending(true)
+   document.body.style.cursor = 'wait';
    await fetch(updateUrl,
      {
        method: 'POST',
        headers: headers
      }
    );
+   setRefreshPending(false)
+   document.body.style.cursor = 'default'
  }
  
  async function onSetRaked(raked, event) {
@@ -410,7 +415,7 @@ export default function App() {
        }
     </tbody>
     </table>
-    <input type="button" value="Refresh" onClick={ onRefresh } disabled={ !authenticated} />
+    <input type="button" value="Refresh" onClick={ onRefresh } disabled={ !authenticated || refreshPending } />
      <table width="360">
      <tbody>
      <tr>
