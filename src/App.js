@@ -415,7 +415,7 @@ export default function App() {
        }
     </tbody>
     </table>
-    <input type="button" value="Refresh" onClick={ onRefresh } disabled={ !authenticated || refreshPending } />
+    <input type="button" value="Refresh" onClick={ onRefresh } disabled={ !authenticated || refreshPending } hidden={ !authenticated}  />
      <table width="360">
      <tbody>
      <tr>
