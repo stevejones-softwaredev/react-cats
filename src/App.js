@@ -5,6 +5,7 @@ import Multiselect from 'multiselect-react-dropdown';
 import EditableText from './EditableText.js';
 import BoundCheckbox from './BoundCheckbox.js';
 import LoginControl from './LoginControl.js';
+import AddRow from './AddRow.js';
 import "./styles.css";
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
@@ -26,6 +27,7 @@ export default function App() {
  const [ syncTime, setSyncTime] = useState(new Date());
  const [ authenticated, setAuthenticated] = useState(false);
  const [ refreshPending, setRefreshPending] = useState(false);
+ const [ showAddRow, setShowAddRow] = useState(false);
  const [ authHeader, setAuthHeader] = useState("");
  
  const severityArray = [
@@ -137,9 +139,23 @@ export default function App() {
    return newElapsed
  }
  
+ function getTimeColumnValue(catEvent) {
+   if (catEvent.manual) {
+     return ("*** " + catEvent.human_time)
+   } else {
+     return (catEvent.human_time)
+   }
+ }
+ 
  function timeDiffFromCurrent(human_time) {
    var trunc = human_time.lastIndexOf(' ')
-   var parsedDate = parse(human_time.substr(0, trunc), 'EEEE, d-MMM-yy HH:mm:ss', new Date())
+   var parsedDate
+   
+   if (human_time[human_time.length - 1] !== 'T') {
+     parsedDate = parse(human_time, 'EEEE, dd-MMM-yy HH:mm:ss', new Date())
+   } else {
+     parsedDate = parse(human_time.substr(0, trunc), 'EEEE, dd-MMM-yy HH:mm:ss', new Date())
+   }
    var diff = (currentTime - parsedDate)
    
    return prettyMilliseconds(diff, {secondsDecimalDigits: 0, colonNotation: true})
@@ -158,8 +174,12 @@ export default function App() {
    event.comment = comment
    patchRecord(event)   
  }
+ 
+ async function onRowClicked(event) {
+   console.log("Row clicked")
+ }
 
- async function onRefresh(event) {
+ async function onRefresh() {
    var updateUrl = process.env.REACT_APP_API_HOST + '/api/cats/refresh'
 
    const headers = { 'Authorization': authHeader };
@@ -174,6 +194,50 @@ export default function App() {
    setRefreshPending(false)
    document.body.style.cursor = 'default'
  }
+
+ async function onShowAddRow() {
+   setShowAddRow(true)
+ }
+ 
+ async function onAddRowKeyDown(event, newEvent) {
+   if (event.key === 'Escape') {
+     setShowAddRow(false)
+   } else if (event.key === 'Enter') {
+     onSubmitRow(newEvent)
+   }
+ }
+ 
+ async function onSubmitRow(newEvent) {
+   var updateUrl = process.env.REACT_APP_API_HOST + '/api/cats/add_event'
+
+   var requestBody = JSON.stringify(newEvent)
+   var success = true
+   console.log(requestBody)
+   const headers = { 'Authorization': authHeader };
+   setRefreshPending(true)
+   document.body.style.cursor = 'wait';
+   await fetch(updateUrl,
+     {
+       method: 'POST',
+       headers: headers,
+       body: requestBody
+     }
+   ).then((response) => {
+     console.log("Status: " + response.status)
+     success = (response.status === 200)
+   });
+
+   document.body.style.cursor = 'default'
+   setRefreshPending(false)
+   if (success) {
+     setShowAddRow(false)
+     fetchNames()
+     fetchLocations()
+     fetchActivities()
+     setSyncTime(new Date())
+     window.location.reload()
+   }
+}
  
  async function onSetRaked(raked, event) {
    event.raked = !raked
@@ -200,6 +264,58 @@ export default function App() {
        headers: headers
      }
    );
+ }
+
+ const fetchNames = async () => {
+       const response = await fetch(
+          process.env.REACT_APP_API_HOST + '/api/cats/list', { credentials : "include" });
+       const data = await response.json();
+
+        let nameOptions = [];
+
+        data.names.forEach(function(arrayItem){
+          var nameOption = {};
+          nameOption.name = arrayItem;
+          nameOptions.push(nameOption);
+        });
+
+        setNameOptions(nameOptions)
+ }
+
+ const fetchLocations = async() => {
+     const response = await fetch(
+        process.env.REACT_APP_API_HOST + '/api/cats/locations', { credentials : "include" });
+        const data = await response.json();
+
+        let locationOptions = [];
+
+        data.locations.forEach(function(arrayItem){
+          if (arrayItem !== '') {
+            var locationOption = {};
+            locationOption.name = arrayItem;
+            locationOptions.push(locationOption);
+          }
+        });
+
+        setLocationOptions(locationOptions)
+ }
+
+ const fetchActivities = async () => {
+     const response = await fetch(
+        process.env.REACT_APP_API_HOST + '/api/cats/activity', { credentials : "include" });
+        const data = await response.json();
+
+        let activityOptions = [];
+
+        data.names.forEach(function(arrayItem){
+          if (arrayItem !== '') {
+            var activityOption = {};
+            activityOption.name = arrayItem;
+            activityOptions.push(activityOption);
+          }
+        });
+
+        setActivityOptions(activityOptions)
  }
 
  async function getEvents() {
@@ -262,61 +378,9 @@ export default function App() {
  useEffect(() => {
    getEvents();
    getCurrent();
-}, [endTime, beginTime, nameOptions, namesRef.current, locationsRef.current, activitiesRef.current, severitiesRef.current, authenticated]);
+}, [endTime, beginTime, nameOptions, namesRef.current, locationsRef.current, activitiesRef.current, severitiesRef.current, authenticated, showAddRow]);
  
  useEffect(() => {
-   const fetchNames = async () => {
-         const response = await fetch(
-            process.env.REACT_APP_API_HOST + '/api/cats/list', { credentials : "include" });
-         const data = await response.json();
-          
-          let nameOptions = [];
-          
-          data.names.forEach(function(arrayItem){
-            var nameOption = {};
-            nameOption.name = arrayItem;
-            nameOptions.push(nameOption);
-          });
-
-          setNameOptions(nameOptions)
-   }
-
-   const fetchLocations = async() => {
-       const response = await fetch(
-          process.env.REACT_APP_API_HOST + '/api/cats/locations', { credentials : "include" });
-          const data = await response.json();
-
-          let locationOptions = [];
-
-          data.locations.forEach(function(arrayItem){
-            if (arrayItem !== '') {
-              var locationOption = {};
-              locationOption.name = arrayItem;
-              locationOptions.push(locationOption);
-            }
-          });
-
-          setLocationOptions(locationOptions)      
-   }
- 
-   const fetchActivities = async () => { 
-       const response = await fetch(
-          process.env.REACT_APP_API_HOST + '/api/cats/activity', { credentials : "include" });
-          const data = await response.json();
-          
-          let activityOptions = [];
-          
-          data.names.forEach(function(arrayItem){
-            if (arrayItem !== '') {
-              var activityOption = {};
-              activityOption.name = arrayItem;
-              activityOptions.push(activityOption);
-            }
-          });
-
-          setActivityOptions(activityOptions)      
-   }
- 
    // Call the function
    fetchNames()
    fetchLocations()
@@ -334,62 +398,7 @@ export default function App() {
 
   useEffect(() => {
     const refreshInterval = setInterval(() => {
-   const fetchNames = async () => {
- 
-       const response = await fetch(
-          process.env.REACT_APP_API_HOST + '/api/cats/list', { credentials : "include" });
-          const data = await response.json();
-          
-          let nameOptions = [];
-          
-          data.names.forEach(function(arrayItem){
-            if ((arrayItem !== '') && (arrayItem !== 'NotACat')) {
-              var nameOption = {};
-              nameOption.name = arrayItem;
-              nameOptions.push(nameOption);
-            }
-          });
 
-          setNameOptions(nameOptions)      
-   }
- 
-   const fetchLocations = async() => {
-       const response = await fetch(
-          process.env.REACT_APP_API_HOST + '/api/cats/locations', { credentials : "include" });
-          const data = await response.json();
-
-          let locationOptions = [];
-
-          data.locations.forEach(function(arrayItem){
-            if ((arrayItem !== '') && (arrayItem !== 'Neither')) {
-              var locationOption = {};
-              locationOption.name = arrayItem;
-              locationOptions.push(locationOption);
-            }
-          });
-
-          console.log("Setting options");
-          setLocationOptions(locationOptions)
-   }
- 
-   const fetchActivities = async () => {
-       const response = await fetch(
-          process.env.REACT_APP_API_HOST + '/api/cats/activity', { credentials : "include" });
-          const data = await response.json();
-          
-          let activityOptions = [];
-          
-          data.names.forEach(function(arrayItem){
-            if ((arrayItem !== '') && (arrayItem !== 'Neither')) {
-              var activityOption = {};
-              activityOption.name = arrayItem;
-              activityOptions.push(activityOption);
-            }
-          });
-
-          setActivityOptions(activityOptions)      
-   }
- 
    // Call the function
      fetchNames()
      fetchLocations()
@@ -438,6 +447,8 @@ export default function App() {
     </tr>
     </tbody>
     </table>
+    <br />
+     <input type="button" value="Add Row" onClick={ onShowAddRow } disabled={ !authenticated || refreshPending } hidden={ !authenticated}  />
      <table>
        <thead>
          <tr>
@@ -452,9 +463,13 @@ export default function App() {
        </thead>   
        <tbody>
          {
+           showAddRow &&
+             <AddRow names={nameOptions} locations={locationOptions} activities={[{name: "💦"}, {name: "💩"}]} onSubmit={ onSubmitRow } onAddRowKeyDown={ onAddRowKeyDown } />
+         }
+         {
          catEvents.map( (catEvent,key) =>
-         <tr key={key} className={getDayStyleName(catEvent)}>
-             <td>{catEvent.human_time }</td>
+         <tr key={key} className={getDayStyleName(catEvent)} onClick={ onRowClicked }>
+             <td>{ getTimeColumnValue(catEvent) }</td>
              <td className={getClassName(catEvent.cat_name) }>{catEvent.cat_name }</td>
              <td><a target="top" href={catEvent.image_url }> {getActivityIcon(catEvent.cat_activity)} </a></td>
              <td>{catEvent.location }</td>
