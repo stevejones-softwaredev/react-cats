@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import Combobox from "react-widgets/Combobox";
 import DateTimePicker from 'react-datetime-picker';
+import "./add-row.css";
 
-const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown }) => {
+const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown, errorMessage }) => {
   const { format } = require('date-fns');
 
   const [ eventTime, setEventTime] = useState(new Date());
@@ -79,7 +80,15 @@ const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown }) => 
   }
 
   return (
-    <tr onKeyDown={ onComponentKeyDown }>
+      <React.Fragment>
+      {
+        (errorMessage.length > 0 && (
+          <tr onKeyDown={ onComponentKeyDown }>
+            <td colspan="7" className="error-display" ><b>{errorMessage}</b></td>
+          </tr>
+        ))
+      }
+      <tr onKeyDown={ onComponentKeyDown }>
       <td><DateTimePicker name="eventTime" value={eventTime } onChange={setTimeFields } /></td>
       <td><Combobox data={names} textField="name" autoSelectMatches="true" onSelect={onNameSelected} /></td>
       <td><Combobox data={activities} textField="name" onSelect={onActivitySelected} /></td>
@@ -88,6 +97,7 @@ const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown }) => 
       <td><input type="text" onChange={onCommentChanged} value={comment} /></td>
       <td><input type="checkbox" onChange={onRakedChanged} value={raked} /></td><td><input type="button" value="Submit" onClick={ sendCatEvent } /></td>
     </tr>
+    </React.Fragment>
   )
 };
 

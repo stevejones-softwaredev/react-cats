@@ -10,10 +10,6 @@ const BoundCheckbox = ({ backGroundColor, initialState, context, onChangeComplet
     onChangeComplete(checked, context)
   };
 
-  useEffect(() => {
-    console.log("isReadOnly changed: " + readOnly)
-  }, [readOnly])
-
   return (
     <div>
     {readOnly ? (

@@ -29,6 +29,7 @@ export default function App() {
  const [ refreshPending, setRefreshPending] = useState(false);
  const [ showAddRow, setShowAddRow] = useState(false);
  const [ authHeader, setAuthHeader] = useState("");
+ const [ addRowErrorMessage, setAddRowErrorMessage] = useState("");
  
  const severityArray = [
    {key: 'ok', display: 'OK'},
@@ -223,13 +224,19 @@ export default function App() {
        body: requestBody
      }
    ).then((response) => {
-     console.log("Status: " + response.status)
      success = (response.status === 200)
+     return response.text()
+   }
+   ).then((data) => {
+     if (!success) {
+       setAddRowErrorMessage(data)
+     }
    });
 
    document.body.style.cursor = 'default'
    setRefreshPending(false)
    if (success) {
+     setAddRowErrorMessage("")
      setShowAddRow(false)
      fetchNames()
      fetchLocations()
@@ -464,7 +471,13 @@ export default function App() {
        <tbody>
          {
            showAddRow &&
-             <AddRow names={nameOptions} locations={locationOptions} activities={[{name: "💦"}, {name: "💩"}]} onSubmit={ onSubmitRow } onAddRowKeyDown={ onAddRowKeyDown } />
+             <AddRow
+               names={nameOptions}
+               locations={locationOptions}
+               activities={[{name: "💦"}, {name: "💩"}]}
+               onSubmit={ onSubmitRow }
+               onAddRowKeyDown={ onAddRowKeyDown }
+               errorMessage={addRowErrorMessage} />
          }
          {
          catEvents.map( (catEvent,key) =>
