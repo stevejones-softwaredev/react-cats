@@ -1,7 +1,7 @@
 //AddRow.js
 import React, { useState } from 'react';
-import Combobox from "react-widgets/Combobox";
 import DateTimePicker from 'react-datetime-picker';
+import Select from 'react-select'
 import "./add-row.css";
 
 const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown, errorMessage }) => {
@@ -14,10 +14,15 @@ const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown, error
   const [ comment, setComment] = useState("");
   const [ raked, setRaked] = useState(false);
   
-  function printObject(obj) {
-    for (var prop in obj) {
-      console.log(prop + ": " + obj[prop])
+  function getLabels(options, field) {
+    var labelList = []
+
+    for (var option of options) {
+      var val = option[field]
+      labelList.push({ label: option[field], value: option[field] })
     }
+
+    return labelList
   }
   
   const setTimeFields = (event) => {
@@ -25,17 +30,15 @@ const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown, error
   }
 
   const onNameSelected = (event) => {
-    setCatName(event.name)
+    setCatName(event.label)
   }
 
   const onLocationSelected = (event) => {
-    printObject(event)
-    setEventLocation(event.name)
+    setEventLocation(event.label)
   }
 
   const onActivitySelected = (event) => {
-    printObject(event)
-    if (event.name === "💦") {
+    if (event.label === "💦") {
       setActivity("Pee")
     } else {
       setActivity("Poop")
@@ -90,9 +93,9 @@ const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown, error
       }
       <tr onKeyDown={ onComponentKeyDown }>
       <td><DateTimePicker name="eventTime" value={eventTime } onChange={setTimeFields } /></td>
-      <td><Combobox data={names} textField="name" autoSelectMatches="true" onSelect={onNameSelected} /></td>
-      <td><Combobox data={activities} textField="name" onSelect={onActivitySelected} /></td>
-      <td><Combobox data={locations} textField="name" autoSelectMatches="true" onSelect={onLocationSelected} /></td>
+      <td><Select options={getLabels(names, 'name')} textField="name" autoSelectMatches="true" onChange={onNameSelected} /></td>
+      <td><Select options={getLabels(activities, 'name')} textField="name" onChange={onActivitySelected} /></td>
+      <td><div style={{width: '250px'}}><Select options={getLabels(locations, 'name')} textField="name" autoSelectMatches="true" onChange={onLocationSelected} /></div></td>
       <td></td>
       <td><input type="text" onChange={onCommentChanged} value={comment} /></td>
       <td><input type="checkbox" onChange={onRakedChanged} value={raked} /></td><td><input type="button" value="Submit" onClick={ sendCatEvent } /></td>

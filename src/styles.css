@@ -15,7 +15,7 @@ th{
 }
 
 td {
-  overflow: hidden;
+  overflow: inherit;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
