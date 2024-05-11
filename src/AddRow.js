@@ -77,7 +77,6 @@ const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown, error
     catEvent.comment = comment
     catEvent.raked = raked
     catEvent.image_url = '<https://steve-jones.dev/web/technical_difficulties.gif>'
-    printObject(catEvent)
 
     onSubmit(catEvent)
   }
