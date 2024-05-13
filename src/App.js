@@ -208,6 +208,10 @@ export default function App() {
    }
  }
  
+ async function onCloseAddRow() {
+   setShowAddRow(false)
+ }
+
  async function onSubmitRow(newEvent) {
    var updateUrl = process.env.REACT_APP_API_HOST + '/api/cats/add_event'
 
@@ -476,6 +480,7 @@ export default function App() {
                locations={locationOptions}
                activities={[{name: "💦"}, {name: "💩"}]}
                onSubmit={ onSubmitRow }
+               onCancel={ onCloseAddRow }
                onAddRowKeyDown={ onAddRowKeyDown }
                errorMessage={addRowErrorMessage} />
          }

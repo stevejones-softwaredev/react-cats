@@ -1,10 +1,10 @@
 //AddRow.js
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import DateTimePicker from 'react-datetime-picker';
 import Select from 'react-select'
 import "./add-row.css";
 
-const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown, errorMessage }) => {
+const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyDown, errorMessage }) => {
   const { format } = require('date-fns');
 
   const [ eventTime, setEventTime] = useState(new Date());
@@ -14,6 +14,20 @@ const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown, error
   const [ comment, setComment] = useState("");
   const [ raked, setRaked] = useState(false);
   
+  const componentRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (componentRef.current && !componentRef.current.contains(event.target)) {
+        onCancel && onCancel();
+      }
+    };
+    document.addEventListener('click', handleClickOutside, true);
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true);
+    };
+  }, [ onCancel ]);
+
   function getLabels(options, field) {
     var labelList = []
 
@@ -81,6 +95,10 @@ const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown, error
     onSubmit(catEvent)
   }
 
+  const closeWidget = () => {
+    onCancel()
+  }
+
   return (
       <React.Fragment>
       {
@@ -90,14 +108,15 @@ const AddRow = ({ names, locations, activities, onSubmit, onAddRowKeyDown, error
           </tr>
         ))
       }
-      <tr onKeyDown={ onComponentKeyDown }>
+      <tr onKeyDown={ onComponentKeyDown } ref={ componentRef } >
       <td><DateTimePicker name="eventTime" value={eventTime } onChange={setTimeFields } /></td>
       <td><Select options={getLabels(names, 'name')} textField="name" autoSelectMatches="true" onChange={onNameSelected} /></td>
       <td><Select options={getLabels(activities, 'name')} textField="name" onChange={onActivitySelected} /></td>
       <td><div style={{width: '250px'}}><Select options={getLabels(locations, 'name')} textField="name" autoSelectMatches="true" onChange={onLocationSelected} /></div></td>
       <td></td>
       <td><input type="text" onChange={onCommentChanged} value={comment} /></td>
-      <td><input type="checkbox" onChange={onRakedChanged} value={raked} /></td><td><input type="button" value="Submit" onClick={ sendCatEvent } /></td>
+      <td><input type="checkbox" onChange={onRakedChanged} value={raked} /></td>
+      <td><input type="button" value="Submit" onClick={ sendCatEvent } /><br /><input type="button" onClick={ closeWidget } value="Cancel"  /></td>
     </tr>
     </React.Fragment>
   )
