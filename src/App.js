@@ -2,8 +2,7 @@ import { React, useEffect, useState, createRef } from "react";
 import prettyMilliseconds from 'pretty-ms';
 import DateTimePicker from 'react-datetime-picker';
 import Multiselect from 'multiselect-react-dropdown';
-import EditableText from './EditableText.js';
-import BoundCheckbox from './BoundCheckbox.js';
+import EditableRow from './EditableRow.js';
 import LoginControl from './LoginControl.js';
 import AddRow from './AddRow.js';
 import "./styles.css";
@@ -41,55 +40,6 @@ export default function App() {
  const activitiesRef = createRef()
  const severitiesRef = createRef()
  
- function getActivityIcon(activity) {
-   if (activity === 'Poop') {
-     return '💩'
-   } else if (activity === 'Pee') {
-     return '💦'
-   } else {
-     return ''
-   }
- }
-
- function getClassName(name) {
-   if (name === 'Savi') {
-     return 'savi-data'
-   } else if (name === 'Sydney') {
-     return 'sydney-data'
-   } else {
-     return 'notacat-data'
-   }
- }
- 
- function getDayStyleName(event) {
-   var trunc = event.human_time.lastIndexOf(' ')
-   var tz = event.human_time.substr(trunc + 1)
-   var utcOffset
-   if (tz ==='EDT') {
-     utcOffset = 14400000
-   } else if (tz === 'EST') {
-     utcOffset = 18000000
-   }
-   var parsedDate = parse(event.human_time.substr(0, trunc), 'EEEE, d-MMM-yy HH:mm:ss', new Date())
-   var dayCount = Math.floor((parsedDate.valueOf() - utcOffset) / (60 * 60 * 24 * 1000))
-   if (dayCount % 2 === 0) {
-     return 'even-data'
-   } else {
-     return 'odd-data'
-   }
- }
- 
- function getElapsedStyleName(event) {
-   if (event.status === 'warn') {
-     return 'long-interval-data'
-   } else if (event.status === 'danger') {
-     return 'very-long-interval-data'
-   }
-   else  {
-     return getDayStyleName(event)
-   }
- }
- 
  function getCurrentElapsedStyleName(event) {
    if (event.status === 'warn') {
      return 'long-interval-data'
@@ -112,40 +62,6 @@ export default function App() {
    }
 
    return elapsed;
- }
- 
- function normalizeElapsedTime(elapsed) {
-   var spaceIndex = elapsed.search(' ')
-   
-   if (-1 === spaceIndex) {
-     return elapsed
-   }
-
-   var dayCount = parseInt(elapsed.substring(0, spaceIndex))
-   dayCount *= 24
-   var parse = elapsed.substring(spaceIndex+1)
-   spaceIndex = parse.search(' ')
-   parse = parse.substring(spaceIndex+1)
-   var hourIndex = parse.search(':')
-   dayCount += parseInt(parse.substring(0, hourIndex))
-   
-   var newElapsed = dayCount.toString()
-   newElapsed += parse.substring(hourIndex)
-   
-   var dotIndex = newElapsed.search('\\.')
-   if (dotIndex !== -1) {
-     newElapsed = newElapsed.substring(0, dotIndex)
-   }
-   
-   return newElapsed
- }
- 
- function getTimeColumnValue(catEvent) {
-   if (catEvent.manual) {
-     return ("*** " + catEvent.human_time)
-   } else {
-     return (catEvent.human_time)
-   }
  }
  
  function timeDiffFromCurrent(human_time) {
@@ -175,9 +91,9 @@ export default function App() {
    event.comment = comment
    patchRecord(event)   
  }
- 
- async function onRowClicked(event) {
-   console.log("Row clicked")
+
+ async function onUpdateEvent(catEvent) {
+   patchRecord(catEvent)
  }
 
  async function onRefresh() {
@@ -199,7 +115,7 @@ export default function App() {
  async function onShowAddRow() {
    setShowAddRow(true)
  }
- 
+
  async function onAddRowKeyDown(event, newEvent) {
    if (event.key === 'Escape') {
      setShowAddRow(false)
@@ -217,7 +133,6 @@ export default function App() {
 
    var requestBody = JSON.stringify(newEvent)
    var success = true
-   console.log(requestBody)
    const headers = { 'Authorization': authHeader };
    setRefreshPending(true)
    document.body.style.cursor = 'wait';
@@ -249,7 +164,7 @@ export default function App() {
      window.location.reload()
    }
 }
- 
+
  async function onSetRaked(raked, event) {
    event.raked = !raked
    patchRecord(event)   
@@ -264,9 +179,16 @@ export default function App() {
  
  async function patchRecord(event) {
    var updateUrl = process.env.REACT_APP_API_HOST + '/api/cats/update/' + event.event_ts
-   
-   var requestBody = JSON.stringify(event)
-   console.log(requestBody)
+   var requestBody
+
+   if ('currentTarget' in event) {
+     var domParser = new DOMParser()
+     var xml = domParser.parseFromString(event.currentTarget.outerHTML, 'text/xml')
+     requestBody = xml.documentElement.getAttribute('data-cat-event')
+   } else {
+     requestBody = JSON.stringify(event)
+   }
+
    const headers = { 'Authorization': authHeader };
    await fetch(updateUrl,
      {
@@ -275,6 +197,7 @@ export default function App() {
        headers: headers
      }
    );
+   window.location.reload()
  }
 
  const fetchNames = async () => {
@@ -481,20 +404,23 @@ export default function App() {
                activities={[{name: "💦"}, {name: "💩"}]}
                onSubmit={ onSubmitRow }
                onCancel={ onCloseAddRow }
+               catEvent={ {} }
                onAddRowKeyDown={ onAddRowKeyDown }
                errorMessage={addRowErrorMessage} />
          }
          {
          catEvents.map( (catEvent,key) =>
-         <tr key={key} className={getDayStyleName(catEvent)} onClick={ onRowClicked }>
-             <td>{ getTimeColumnValue(catEvent) }</td>
-             <td className={getClassName(catEvent.cat_name) }>{catEvent.cat_name }</td>
-             <td><a target="top" href={catEvent.image_url }> {getActivityIcon(catEvent.cat_activity)} </a></td>
-             <td>{catEvent.location }</td>
-             <td className={getElapsedStyleName(catEvent) }>{normalizeElapsedTime(catEvent.elapsed) }</td>
-             <td><EditableText backGroundColor="orange" textColor="white" initialText={catEvent.comment} context={catEvent } onEditComplete={onSetComment } readOnly={!authenticated } /></td>
-             <td><BoundCheckbox backGroundColor="orange" textColor="white" initialState={catEvent.raked} context={catEvent } onChangeComplete={onSetRaked } readOnly={!authenticated } /></td>
-         </tr>
+         <EditableRow
+           key={key}
+           catEvent={ catEvent }
+           names={ nameOptions }
+           locations={ locationOptions }
+           activities={ activityOptions }
+           onSubmit={ onUpdateEvent }
+           onAddRowKeyDown={ onUpdateEvent }
+           onSetCommentHandler= { onSetComment }
+           onSetRakedHandler={ onSetRaked }
+           authenticated={ authenticated } />
          )
        }
        </tbody>	

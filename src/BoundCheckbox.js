@@ -10,8 +10,12 @@ const BoundCheckbox = ({ backGroundColor, initialState, context, onChangeComplet
     onChangeComplete(checked, context)
   };
 
+  const handleClick = (event) => {
+    event.stopPropagation()
+  };
+
   return (
-    <div>
+    <div onClick={handleClick}>
     {readOnly ? (
       <span width="130" >
         <input

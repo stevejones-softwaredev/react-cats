@@ -2,17 +2,34 @@
 import React, { useState, useEffect, useRef } from 'react';
 import DateTimePicker from 'react-datetime-picker';
 import Select from 'react-select'
+import moment from 'moment';
+import { enUS } from 'date-fns/locale/en-US'
 import "./add-row.css";
 
-const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyDown, errorMessage }) => {
-  const { format } = require('date-fns');
+const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyDown, errorMessage, catEvent }) => {
+  const { format } = require('date-fns-tz');
+  var initialTime, initialDate
 
-  const [ eventTime, setEventTime] = useState(new Date());
-  const [ catName, setCatName] = useState("");
-  const [ activity, setActivity] = useState("");
-  const [ eventLocation, setEventLocation] = useState("");
-  const [ comment, setComment] = useState("");
-  const [ raked, setRaked] = useState(false);
+  if (catEvent && catEvent.event_ts) {
+    initialTime = String(catEvent.event_ts)
+  } else {
+    initialTime = String(new Date().valueOf())
+  }
+
+  if (catEvent && catEvent.human_time) {
+    initialDate = moment(catEvent.human_time, 'dddd, DD-MMM-YYYY HH:mm:ss').toDate()
+  } else {
+    initialDate = new Date()
+  }
+
+  const [ eventTime, setEventTime] = useState(initialTime);
+  const [ humanTime, setHumanTime] = useState(initialDate);
+  const [ catName, setCatName] = useState(catEvent.cat_name);
+  const [ activity, setActivity] = useState(catEvent.cat_activity);
+  const [ eventLocation, setEventLocation] = useState(catEvent.location);
+  const [ comment, setComment] = useState(catEvent.comment);
+  const [ raked, setRaked] = useState(catEvent.raked);
+  const [ manual, setManual] = useState(catEvent.manual);
   
   const componentRef = useRef(null);
 
@@ -32,15 +49,44 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
     var labelList = []
 
     for (var option of options) {
-      var val = option[field]
       labelList.push({ label: option[field], value: option[field] })
     }
 
     return labelList
   }
-  
-  const setTimeFields = (event) => {
-    setEventTime(event)
+
+  function createDefaultValue(initial) {
+    if (initial === "Pee") {
+      return ({ label: "💦", value: "💦" })
+    } else if (initial === "Poop") {
+      return ({ label: "💩", value: "💩" })
+    } else {
+      return ({ label: initial, value: initial })
+    }
+  }
+
+  function getCatName() {
+    if (catEvent && catEvent.cat_name) {
+      return createDefaultValue(catEvent.cat_name)
+    }
+
+    return createDefaultValue(catName)
+  }
+
+  function getCatActivity() {
+    if (catEvent && catEvent.cat_activity) {
+      return createDefaultValue(catEvent.cat_activity)
+    }
+
+    return createDefaultValue(activity)
+  }
+
+  function getLocation() {
+    if (catEvent && catEvent.location) {
+      return createDefaultValue(catEvent.location)
+    }
+
+    return createDefaultValue(eventLocation)
   }
 
   const onNameSelected = (event) => {
@@ -61,35 +107,45 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
   
   const onComponentKeyDown = (event) => {
     var catEvent = {}
-    catEvent.event_ts = parseInt(eventTime.valueOf() / 1000) + ".000000"
-    catEvent.human_time = format(eventTime, 'EEEE, dd-MMM-yy HH:mm:ss')
+    catEvent.event_ts = eventTime
+    catEvent.human_time = format(humanTime, 'EEEE, dd-MMM-yy HH:mm:ss zzz', {
+      timeZone: 'America/New_York',
+      locale: enUS
+    }).valueOf()
     catEvent.cat_name = catName
     catEvent.cat_activity = activity
     catEvent.location = eventLocation
     catEvent.comment = comment
     catEvent.raked = raked
+    catEvent.manual = manual
     catEvent.image_url = '<https://steve-jones.dev/web/technical_difficulties.gif>'
 
     onAddRowKeyDown(event, catEvent)
   }
 
   const onCommentChanged = (event) => {
+    catEvent.comment = event.target.value
     setComment(event.target.value)
   }
 
   const onRakedChanged = (event) => {
+    catEvent.raked = event.target.checked
     setRaked(event.target.checked)
   }
   
   const sendCatEvent = () => {
     var catEvent = {}
-    catEvent.event_ts = parseInt(eventTime.valueOf() / 1000) + ".000000"
-    catEvent.human_time = format(eventTime, 'EEEE, dd-MMM-yy HH:mm:ss')
+    catEvent.event_ts = eventTime
+    catEvent.human_time = format(humanTime, 'EEEE, dd-MMM-yy HH:mm:ss zzz', {
+      timeZone: 'America/New_York',
+      locale: enUS
+    }).valueOf()
     catEvent.cat_name = catName
     catEvent.cat_activity = activity
     catEvent.location = eventLocation
     catEvent.comment = comment
     catEvent.raked = raked
+    catEvent.manual = manual
     catEvent.image_url = '<https://steve-jones.dev/web/technical_difficulties.gif>'
 
     onSubmit(catEvent)
@@ -108,14 +164,16 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
           </tr>
         ))
       }
-      <tr onKeyDown={ onComponentKeyDown } ref={ componentRef } >
-      <td><DateTimePicker name="eventTime" value={eventTime } onChange={setTimeFields } /></td>
-      <td><Select options={getLabels(names, 'name')} textField="name" autoSelectMatches="true" onChange={onNameSelected} /></td>
-      <td><Select options={getLabels(activities, 'name')} textField="name" onChange={onActivitySelected} /></td>
-      <td><div style={{width: '250px'}}><Select options={getLabels(locations, 'name')} textField="name" autoSelectMatches="true" onChange={onLocationSelected} /></div></td>
-      <td></td>
-      <td><input type="text" onChange={onCommentChanged} value={comment} /></td>
-      <td><input type="checkbox" onChange={onRakedChanged} value={raked} /></td>
+      <tr onKeyDown={ onComponentKeyDown } ref={ componentRef } data-cat-event={JSON.stringify(catEvent) } >
+      <td><DateTimePicker name="eventTime" value={ humanTime } onChange={setHumanTime } /></td>
+      <td><Select options={getLabels(names, 'name')} textField="name" autoSelectMatches="true" onChange={onNameSelected} defaultValue={ getCatName() } /></td>
+      <td><Select options={getLabels(activities, 'name')} textField="name" onChange={onActivitySelected} defaultValue={ getCatActivity() } /></td>
+      <td><div style={{width: '250px'}}>
+         <Select options={getLabels(locations, 'name')} textField="name" autoSelectMatches="true" onChange={onLocationSelected} defaultValue={ getLocation() } />
+      </div></td>
+      <td>{catEvent.elapsed}</td>
+      <td><input type="text" onChange={onCommentChanged} value={ catEvent.comment } /></td>
+      <td><input type="checkbox" onChange={onRakedChanged} checked={ catEvent.raked } /></td>
       <td><input type="button" value="Submit" onClick={ sendCatEvent } /><br /><input type="button" onClick={ closeWidget } value="Cancel"  /></td>
     </tr>
     </React.Fragment>

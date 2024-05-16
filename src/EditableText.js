@@ -7,7 +7,8 @@ const EditableText = ({ backGroundColor, textColor, initialText, context, onEdit
   const [baseText, setBaseText] = useState(initialText)
   const [text, setText] = useState(initialText)
 
-  const handleClick = () => {
+  const handleClick = (event) => {
+    event.stopPropagation()
     setIsEditing(true);
   };
 
