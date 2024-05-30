@@ -1,13 +1,9 @@
 //AddRow.js
 import React, { useState, useEffect, useRef } from 'react';
-import DateTimePicker from 'react-datetime-picker';
 import Select from 'react-select'
-import moment from 'moment';
-import { enUS } from 'date-fns/locale/en-US'
 import "./add-row.css";
 
 const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyDown, errorMessage, catEvent }) => {
-  const { format } = require('date-fns-tz');
   var initialTime, initialDate
 
   if (catEvent && catEvent.event_ts) {
@@ -16,20 +12,24 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
     initialTime = String(new Date().valueOf())
   }
 
-  if (catEvent && catEvent.human_time) {
-    initialDate = moment(catEvent.human_time, 'dddd, DD-MMM-YYYY HH:mm:ss').toDate()
+  console.log(catEvent)
+  if (catEvent && catEvent.wyze_ts) {
+    console.log("Wyze ts: " + (catEvent.wyze_ts * 1000))
+    initialDate = new Date(catEvent.wyze_ts * 1000)
   } else {
     initialDate = new Date()
   }
 
+  console.log('Initial Date: ' + initialDate.toLocaleString())
+
   const [ eventTime, setEventTime] = useState(initialTime);
-  const [ humanTime, setHumanTime] = useState(initialDate);
+  const [ wyzeTs, setWyzeTs] = useState(initialDate);
   const [ catName, setCatName] = useState(catEvent.cat_name);
   const [ activity, setActivity] = useState(catEvent.cat_activity);
   const [ eventLocation, setEventLocation] = useState(catEvent.location);
   const [ comment, setComment] = useState(catEvent.comment);
   const [ raked, setRaked] = useState(catEvent.raked);
-  const [ manual, setManual] = useState(catEvent.manual);
+  const [ manual] = useState(catEvent.manual);
   
   const componentRef = useRef(null);
 
@@ -89,6 +89,17 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
     return createDefaultValue(eventLocation)
   }
 
+ function getTimeInputString(targetDate) {
+   var localTime = new Date(targetDate.getTime() - (targetDate.getTimezoneOffset() * 60000))
+   console.log(localTime.toISOString().split('.')[0])
+   return localTime.toISOString().split('.')[0]
+ }
+
+ function eventTimeChanged(e) {
+   var eventTime = new Date(e.target.value)
+   setWyzeTs(new Date(eventTime.getTime()))
+ }
+ 
   const onNameSelected = (event) => {
     setCatName(event.label)
   }
@@ -108,10 +119,7 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
   const onComponentKeyDown = (event) => {
     var catEvent = {}
     catEvent.event_ts = eventTime
-    catEvent.human_time = format(humanTime, 'EEEE, dd-MMM-yy HH:mm:ss zzz', {
-      timeZone: 'America/New_York',
-      locale: enUS
-    }).valueOf()
+    catEvent.wyze_ts = Math.floor(wyzeTs.getTime() / 1000)
     catEvent.cat_name = catName
     catEvent.cat_activity = activity
     catEvent.location = eventLocation
@@ -136,10 +144,7 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
   const sendCatEvent = () => {
     var catEvent = {}
     catEvent.event_ts = eventTime
-    catEvent.human_time = format(humanTime, 'EEEE, dd-MMM-yy HH:mm:ss zzz', {
-      timeZone: 'America/New_York',
-      locale: enUS
-    }).valueOf()
+    catEvent.wyze_ts = Math.floor(wyzeTs.getTime() / 1000)
     catEvent.cat_name = catName
     catEvent.cat_activity = activity
     catEvent.location = eventLocation
@@ -165,7 +170,7 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
         ))
       }
       <tr onKeyDown={ onComponentKeyDown } ref={ componentRef } data-cat-event={JSON.stringify(catEvent) } >
-      <td><DateTimePicker name="eventTime" value={ humanTime } onChange={setHumanTime } /></td>
+      <td><input type="datetime-local" defaultValue={ getTimeInputString(initialDate) } onChange={eventTimeChanged } /></td>
       <td><Select options={getLabels(names, 'name')} textField="name" autoSelectMatches="true" onChange={onNameSelected} defaultValue={ getCatName() } /></td>
       <td><Select options={getLabels(activities, 'name')} textField="name" onChange={onActivitySelected} defaultValue={ getCatActivity() } /></td>
       <td><div style={{width: '250px'}}>

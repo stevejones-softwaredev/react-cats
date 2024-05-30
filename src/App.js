@@ -1,20 +1,16 @@
 import { React, useEffect, useState, createRef } from "react";
 import prettyMilliseconds from 'pretty-ms';
-import DateTimePicker from 'react-datetime-picker';
 import Multiselect from 'multiselect-react-dropdown';
 import EditableRow from './EditableRow.js';
 import LoginControl from './LoginControl.js';
 import AddRow from './AddRow.js';
 import "./styles.css";
-import 'react-datetime-picker/dist/DateTimePicker.css';
-import 'react-calendar/dist/Calendar.css';
-import 'react-clock/dist/Clock.css';
+import { formatInTimeZone } from 'date-fns-tz'
 
 export default function App() {
  var initBeginTime = new Date()
  initBeginTime.setHours(initBeginTime.getHours() - 48)
- 
- const { parse } = require('date-fns');
+
  const [ catEvents, setCatEvents ] = useState([])
  const [ currentEvents, setCurrentEvents ] = useState([])
  const [ nameOptions, setNameOptions ] = useState([])
@@ -64,20 +60,33 @@ export default function App() {
    return elapsed;
  }
  
- function timeDiffFromCurrent(human_time) {
-   var trunc = human_time.lastIndexOf(' ')
-   var parsedDate
-   
-   if (human_time[human_time.length - 1] !== 'T') {
-     parsedDate = parse(human_time, 'EEEE, dd-MMM-yy HH:mm:ss', new Date())
-   } else {
-     parsedDate = parse(human_time.substr(0, trunc), 'EEEE, dd-MMM-yy HH:mm:ss', new Date())
-   }
+ function timeDiffFromCurrent(wyze_ts) {
+   var parsedDate = new Date(wyze_ts * 1000)
    var diff = (currentTime - parsedDate)
    
    return prettyMilliseconds(diff, {secondsDecimalDigits: 0, colonNotation: true})
  }
  
+ function getDateFromTs(wyze_ts) {
+   var wyzeDate = new Date(wyze_ts * 1000)
+   return formatInTimeZone(wyzeDate, Intl.DateTimeFormat().resolvedOptions().timeZone, 'eeee MMMM dd, yyyy HH:mm:ss zzz')
+ }
+
+ function getTimeInputString(targetDate) {
+   var localTime = new Date(targetDate.getTime() - (targetDate.getTimezoneOffset() * 60000))
+   return localTime.toISOString().split('.')[0]
+ }
+
+ function beginTimeChanged(e) {
+   var lowTime = new Date(e.target.value)
+   setBeginTime(new Date(lowTime.getTime()))
+ }
+
+ function endTimeChanged(e) {
+   var highTime = new Date(e.target.value)
+   setEndTime(new Date(highTime.getTime()))
+ }
+
  async function getCurrent() {
    var catUrl = process.env.REACT_APP_API_HOST + '/api/cats/current'
 
@@ -89,11 +98,13 @@ export default function App() {
 
  async function onSetComment(comment, event) {
    event.comment = comment
-   patchRecord(event)   
+   patchRecord(event, false)
  }
 
  async function onUpdateEvent(catEvent) {
-   patchRecord(catEvent)
+   console.log(catEvent.event_ts)
+   console.log(catEvent)
+   patchRecord(catEvent, true)
  }
 
  async function onRefresh() {
@@ -167,7 +178,7 @@ export default function App() {
 
  async function onSetRaked(raked, event) {
    event.raked = !raked
-   patchRecord(event)   
+   patchRecord(event, false)
  }
  
  async function onAuthChanged(authenticated, authHeader) {
@@ -177,7 +188,7 @@ export default function App() {
    }
  }
  
- async function patchRecord(event) {
+ async function patchRecord(event, reload) {
    var updateUrl = process.env.REACT_APP_API_HOST + '/api/cats/update/' + event.event_ts
    var requestBody
 
@@ -197,7 +208,9 @@ export default function App() {
        headers: headers
      }
    );
-   window.location.reload()
+   if (reload) {
+     window.location.reload()
+   }
  }
 
  const fetchNames = async () => {
@@ -352,7 +365,7 @@ export default function App() {
          {
          currentEvents.map( (currentEvent,key) =>
          <tr key={key}>
-             <td className={getCurrentElapsedStyleName(currentEvent) }>{currentEvent.cat_name} last recorded {currentEvent.cat_activity} at {currentEvent.human_time} ({formatCurrentElapsedTime(timeDiffFromCurrent(currentEvent.human_time))} ago) </td>
+             <td className={getCurrentElapsedStyleName(currentEvent) }>{currentEvent.cat_name} last recorded {currentEvent.cat_activity} at {getDateFromTs(currentEvent.wyze_ts)} ({formatCurrentElapsedTime(timeDiffFromCurrent(currentEvent.wyze_ts))} ago) </td>
          </tr>
          )
        }
@@ -374,10 +387,10 @@ export default function App() {
        Severity: <Multiselect id="severity" name="targetSeverity" options={severityArray} displayValue="display" ref={severitiesRef} onSelect={getEvents } onRemove={getEvents }  selectedValues={severityArray} />
      </tr>
      <tr>
-      From: <DateTimePicker name="beginTime" value={beginTime } onChange={setBeginTime } />
+      From: <input type="datetime-local" defaultValue={ getTimeInputString(beginTime) } onChange={beginTimeChanged } />
     </tr>
      <tr>
-      To: <DateTimePicker name="endTime" value={endTime } onChange={setEndTime } />
+      To: <input type="datetime-local" defaultValue={ getTimeInputString(endTime) } onChange={endTimeChanged } />
     </tr>
     </tbody>
     </table>

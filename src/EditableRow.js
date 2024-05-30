@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import AddRow from './AddRow.js';
 import BoundCheckbox from './BoundCheckbox.js';
 import EditableText from './EditableText.js';
+import { formatInTimeZone } from 'date-fns-tz'
 
 const EditableRow = ({ names,
                        locations,
@@ -17,8 +18,6 @@ const EditableRow = ({ names,
                        onClickOutside,
                        onSetCommentHandler,
                        onSetRakedHandler }) => {
- const { parse } = require('date-fns');
-
  const [ isEditing, setIsEditing] = useState(false);
 
  function getActivityIcon(activity) {
@@ -53,16 +52,9 @@ const EditableRow = ({ names,
  }
 
  function getDayStyleName(event) {
-   var trunc = event.human_time.lastIndexOf(' ')
-   var tz = event.human_time.substr(trunc + 1)
-   var utcOffset
-   if (tz ==='EDT') {
-     utcOffset = 14400000
-   } else if (tz === 'EST') {
-     utcOffset = 18000000
-   }
-   var parsedDate = parse(event.human_time.substr(0, trunc), 'EEEE, d-MMM-yy HH:mm:ss', new Date())
-   var dayCount = Math.floor((parsedDate.valueOf() - utcOffset) / (60 * 60 * 24 * 1000))
+   var parsedDate = new Date(event.wyze_ts * 1000)
+   var utcOffset = parsedDate.getTimezoneOffset()
+   var dayCount = Math.floor((parsedDate.valueOf() - (utcOffset * 60000) ) / (60 * 60 * 24 * 1000))
    if (dayCount % 2 === 0) {
      return 'even-data'
    } else {
@@ -71,11 +63,8 @@ const EditableRow = ({ names,
  }
 
  function getTimeColumnValue(catEvent) {
-   if (catEvent.manual) {
-     return ("*** " + catEvent.human_time)
-   } else {
-     return (catEvent.human_time)
-   }
+   var wyzeDate = new Date(catEvent.wyze_ts * 1000)
+   return formatInTimeZone(wyzeDate, Intl.DateTimeFormat().resolvedOptions().timeZone, 'eeee MMMM dd, yyyy HH:mm:ss zzz')
  }
 
  function normalizeElapsedTime(elapsed) {

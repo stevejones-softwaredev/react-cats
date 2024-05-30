@@ -1,5 +1,5 @@
 // BoundCheckbox.js
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import "./editable-text.css";
 
 const BoundCheckbox = ({ backGroundColor, initialState, context, onChangeComplete, readOnly }) => {
