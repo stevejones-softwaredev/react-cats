@@ -45,6 +45,18 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
     };
   }, [ onCancel ]);
 
+  function getCatOptions(options) {
+    var catList = getLabels(options, 'name')
+    catList.push({ label: 'NotACat', value: 'NotACat' })
+    return catList
+  }
+
+  function getActivityOptions(options) {
+    var activityList = getLabels(options, 'name')
+    activityList.push({ label: 'Neither', value: 'Neither' })
+    return activityList
+  }
+
   function getLabels(options, field) {
     var labelList = []
 
@@ -111,8 +123,10 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
   const onActivitySelected = (event) => {
     if (event.label === "💦") {
       setActivity("Pee")
-    } else {
+    } else if (event.label === "💩") {
       setActivity("Poop")
+    } else {
+      setActivity(event.label)
     }
   }
   
@@ -171,8 +185,8 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
       }
       <tr onKeyDown={ onComponentKeyDown } ref={ componentRef } data-cat-event={JSON.stringify(catEvent) } >
       <td><input type="datetime-local" defaultValue={ getTimeInputString(initialDate) } onChange={eventTimeChanged } /></td>
-      <td><Select options={getLabels(names, 'name')} textField="name" autoSelectMatches="true" onChange={onNameSelected} defaultValue={ getCatName() } /></td>
-      <td><Select options={getLabels(activities, 'name')} textField="name" onChange={onActivitySelected} defaultValue={ getCatActivity() } /></td>
+      <td><Select options={getCatOptions(names)} textField="name" autoSelectMatches="true" onChange={onNameSelected} defaultValue={ getCatName() } /></td>
+      <td><Select options={getActivityOptions(activities)} textField="name" onChange={onActivitySelected} defaultValue={ getCatActivity() } /></td>
       <td><div style={{width: '250px'}}>
          <Select options={getLabels(locations, 'name')} textField="name" autoSelectMatches="true" onChange={onLocationSelected} defaultValue={ getLocation() } />
       </div></td>

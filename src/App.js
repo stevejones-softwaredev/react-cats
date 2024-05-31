@@ -121,6 +121,10 @@ export default function App() {
    );
    setRefreshPending(false)
    document.body.style.cursor = 'default'
+   fetchNames()
+   fetchLocations()
+   fetchActivities()
+   setSyncTime(new Date())
  }
 
  async function onShowAddRow() {

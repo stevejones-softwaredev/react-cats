@@ -64,7 +64,13 @@ const EditableRow = ({ names,
 
  function getTimeColumnValue(catEvent) {
    var wyzeDate = new Date(catEvent.wyze_ts * 1000)
-   return formatInTimeZone(wyzeDate, Intl.DateTimeFormat().resolvedOptions().timeZone, 'eeee MMMM dd, yyyy HH:mm:ss zzz')
+   var timeString = formatInTimeZone(wyzeDate, Intl.DateTimeFormat().resolvedOptions().timeZone, 'eeee MMMM dd, yyyy HH:mm:ss zzz')
+
+   if (catEvent.manual) {
+     return ("*** " + timeString)
+   } else {
+     return timeString
+   }
  }
 
  function normalizeElapsedTime(elapsed) {
