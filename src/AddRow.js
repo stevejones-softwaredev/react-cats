@@ -1,5 +1,6 @@
 //AddRow.js
 import React, { useState, useEffect, useRef } from 'react';
+import CreatableSelect from 'react-select/creatable';
 import Select from 'react-select'
 import "./add-row.css";
 
@@ -188,7 +189,7 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
       <td><Select options={getCatOptions(names)} textField="name" autoSelectMatches="true" onChange={onNameSelected} defaultValue={ getCatName() } /></td>
       <td><Select options={getActivityOptions(activities)} textField="name" onChange={onActivitySelected} defaultValue={ getCatActivity() } /></td>
       <td><div style={{width: '250px'}}>
-         <Select options={getLabels(locations, 'name')} textField="name" autoSelectMatches="true" onChange={onLocationSelected} defaultValue={ getLocation() } />
+         <CreatableSelect options={getLabels(locations, 'name')} textField="name" autoSelectMatches="true" onChange={onLocationSelected} defaultValue={ getLocation() } />
       </div></td>
       <td>{catEvent.elapsed}</td>
       <td><input type="text" onChange={onCommentChanged} value={ catEvent.comment } /></td>
