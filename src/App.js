@@ -3,7 +3,9 @@ import prettyMilliseconds from 'pretty-ms';
 import Multiselect from 'multiselect-react-dropdown';
 import EditableRow from './EditableRow.js';
 import LoginControl from './LoginControl.js';
+import Popup from 'reactjs-popup';
 import AddRow from './AddRow.js';
+import 'reactjs-popup/dist/index.css';
 import "./styles.css";
 import { formatInTimeZone } from 'date-fns-tz'
 
@@ -25,6 +27,8 @@ export default function App() {
  const [ showAddRow, setShowAddRow] = useState(false);
  const [ authHeader, setAuthHeader] = useState("");
  const [ addRowErrorMessage, setAddRowErrorMessage] = useState("");
+ const [ showImagePopup, setShowImagePopup] = useState(false);
+ const [ popupImage, setPopupImage] = useState("https://steve-jones.dev/web/technical_difficulties.gif");
  
  const severityArray = [
    {key: 'ok', display: 'OK'},
@@ -325,6 +329,15 @@ export default function App() {
 
    setCatEvents(data.events)      
  }
+
+ async function onShowImage(image_url) {
+   setShowImagePopup(true)
+   setPopupImage(image_url)
+ }
+ 
+ async function onHideImage(e) {
+   setShowImagePopup(false)
+ }
  
  useEffect(() => {
    getEvents();
@@ -363,6 +376,9 @@ export default function App() {
  return (
    <div className="App">
      <h1>Cat Stuff</h1>
+     <Popup open={showImagePopup} onClose={ onHideImage } className="image" >
+       <img height="100%" width="100%" src={popupImage} />
+     </Popup>
      <LoginControl initialState={authenticated} handleAuthChange={onAuthChanged} />
      <table width="360">
      <tbody>
@@ -437,6 +453,7 @@ export default function App() {
            onAddRowKeyDown={ onUpdateEvent }
            onSetCommentHandler= { onSetComment }
            onSetRakedHandler={ onSetRaked }
+           onShowImage={ onShowImage }
            authenticated={ authenticated } />
          )
        }

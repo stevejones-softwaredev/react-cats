@@ -17,7 +17,8 @@ const EditableRow = ({ names,
                        onAddRowKeyDown,
                        onClickOutside,
                        onSetCommentHandler,
-                       onSetRakedHandler }) => {
+                       onSetRakedHandler,
+                       onShowImage }) => {
  const [ isEditing, setIsEditing] = useState(false);
 
  function getActivityIcon(activity) {
@@ -105,6 +106,11 @@ const EditableRow = ({ names,
    }
    setIsEditing(true)
  }
+ 
+ async function onImageClick() {
+   console.log("onImageclick row handler called")
+   onShowImage(catEvent.new_url)
+ }
 
  async function onDismissEdit() {
    setIsEditing(false)
@@ -136,7 +142,7 @@ const EditableRow = ({ names,
          <tr key={key} className={getDayStyleName(catEvent)} onDoubleClick={ onRowClicked } data-cat-event={JSON.stringify(catEvent) } >
              <td>{ getTimeColumnValue(catEvent) }</td>
              <td className={getClassName(catEvent.cat_name) }>{catEvent.cat_name }</td>
-             <td><a target="top" href={catEvent.image_url }> {getActivityIcon(catEvent.cat_activity)} </a></td>
+             <td onClick={onImageClick} className="activity-td" >{getActivityIcon(catEvent.cat_activity)} </td>
              <td>{catEvent.location }</td>
              <td className={getElapsedStyleName(catEvent) }>{normalizeElapsedTime(catEvent.elapsed) }</td>
              <td><EditableText backGroundColor="orange" textColor="white" initialText={catEvent.comment} context={catEvent } onEditComplete={ onSetCommentHandler } readOnly={!authenticated } /></td>
