@@ -108,8 +108,7 @@ const EditableRow = ({ names,
  }
  
  async function onImageClick() {
-   console.log("onImageclick row handler called")
-   onShowImage(catEvent.new_url)
+   onShowImage(catEvent)
  }
 
  async function onDismissEdit() {

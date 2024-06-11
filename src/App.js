@@ -29,6 +29,9 @@ export default function App() {
  const [ addRowErrorMessage, setAddRowErrorMessage] = useState("");
  const [ showImagePopup, setShowImagePopup] = useState(false);
  const [ popupImage, setPopupImage] = useState("https://steve-jones.dev/web/technical_difficulties.gif");
+ const [ popupName, setPopupName] = useState("");
+ const [ popupTime, setPopupTime] = useState("");
+ const [ popupActivity, setPopupActivity ] = useState("")
  
  const severityArray = [
    {key: 'ok', display: 'OK'},
@@ -330,9 +333,33 @@ export default function App() {
    setCatEvents(data.events)      
  }
 
- async function onShowImage(image_url) {
+ function getTimeColumnValue(catEvent) {
+   var wyzeDate = new Date(catEvent.wyze_ts * 1000)
+   var timeString = formatInTimeZone(wyzeDate, Intl.DateTimeFormat().resolvedOptions().timeZone, 'eeee MMMM dd, yyyy HH:mm:ss zzz')
+
+   if (catEvent.manual) {
+     return ("*** " + timeString)
+   } else {
+     return timeString
+   }
+ }
+
+ function getActivityIcon(activity) {
+   if (activity === 'Poop') {
+     return '💩'
+   } else if (activity === 'Pee') {
+     return '💦'
+   } else {
+     return ''
+   }
+ }
+
+ async function onShowImage(catEvent) {
    setShowImagePopup(true)
-   setPopupImage(image_url)
+   setPopupImage(catEvent.new_url)
+   setPopupName(catEvent.cat_name)
+   setPopupTime(getTimeColumnValue(catEvent))
+   setPopupActivity(getActivityIcon(catEvent.cat_activity))
  }
  
  async function onHideImage(e) {
@@ -378,6 +405,7 @@ export default function App() {
      <h1>Cat Stuff</h1>
      <Popup open={showImagePopup} onClose={ onHideImage } className="image" >
        <img height="100%" width="100%" src={popupImage} />
+       <p style= {{textAlign:'center' }}> { popupTime } - { popupName } {popupActivity } </p>
      </Popup>
      <LoginControl initialState={authenticated} handleAuthChange={onAuthChanged} />
      <table width="360">
