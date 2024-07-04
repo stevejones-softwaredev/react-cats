@@ -1,6 +1,6 @@
 import { React, useEffect, useState, createRef } from "react";
 import prettyMilliseconds from 'pretty-ms';
-import Multiselect from 'multiselect-react-dropdown';
+import { MultiSelect } from "react-multi-select-component";
 import EditableRow from './EditableRow.js';
 import LoginControl from './LoginControl.js';
 import Popup from 'reactjs-popup';
@@ -18,6 +18,10 @@ export default function App() {
  const [ nameOptions, setNameOptions ] = useState([])
  const [ locationOptions, setLocationOptions ] = useState([])
  const [ activityOptions, setActivityOptions ] = useState([])
+ const [ selectedNames, setSelectedNames ] = useState([])
+ const [ selectedLocations, setSelectedLocations ] = useState([])
+ const [ selectedActivities, setSelectedActivities ] = useState([])
+ const [ selectedSeverities, setSelectedSeverities ] = useState([])
  const [ beginTime, setBeginTime ] = useState(initBeginTime)
  const [ endTime, setEndTime ] = useState(new Date())
  const [ currentTime, setCurrentTime] = useState(new Date());
@@ -34,14 +38,9 @@ export default function App() {
  const [ popupActivity, setPopupActivity ] = useState("")
  
  const severityArray = [
-   {key: 'ok', display: 'OK'},
-   {key: 'warn', display: 'Warn'},
-   {key: 'danger', display: 'Danger'}]
- 
- const namesRef = createRef()
- const locationsRef = createRef()
- const activitiesRef = createRef()
- const severitiesRef = createRef()
+   {value: 'ok', label: 'OK'},
+   {value: 'warn', label: 'Warn'},
+   {value: 'danger', label: 'Danger'}]
  
  function getCurrentElapsedStyleName(event) {
    if (event.status === 'warn') {
@@ -233,7 +232,8 @@ export default function App() {
 
         data.names.forEach(function(arrayItem){
           var nameOption = {};
-          nameOption.name = arrayItem;
+          nameOption.label = arrayItem;
+          nameOption.value = arrayItem;
           nameOptions.push(nameOption);
         });
 
@@ -250,7 +250,8 @@ export default function App() {
         data.locations.forEach(function(arrayItem){
           if (arrayItem !== '') {
             var locationOption = {};
-            locationOption.name = arrayItem;
+            locationOption.label = arrayItem;
+            locationOption.value = arrayItem;
             locationOptions.push(locationOption);
           }
         });
@@ -268,7 +269,8 @@ export default function App() {
         data.names.forEach(function(arrayItem){
           if (arrayItem !== '') {
             var activityOption = {};
-            activityOption.name = arrayItem;
+            activityOption.label = arrayItem;
+            activityOption.value = arrayItem;
             activityOptions.push(activityOption);
           }
         });
@@ -283,44 +285,44 @@ export default function App() {
    var locationsString = ''
    var activitiesString = ''
    var severitiesString = ''
-   namesRef.current.getSelectedItems().forEach(function(arrayItem){
+   selectedNames.forEach(function(arrayItem){
      if (namesString.length !== 0) {
        namesString += ','
      }
-     namesString += arrayItem.name
+     namesString += arrayItem.value
    });
 
    if (namesString.length !== 0) {
      catUrl += '&names=' + namesString
    }
  
-   locationsRef.current.getSelectedItems().forEach(function(arrayItem){
+   selectedLocations.forEach(function(arrayItem){
      if (locationsString.length !== 0) {
        locationsString += ','
      }
-     locationsString += arrayItem.name
+     locationsString += arrayItem.value
    });
 
    if (locationsString.length !== 0) {
      catUrl += '&locations=' + locationsString
    }
  
-   activitiesRef.current.getSelectedItems().forEach(function(arrayItem){
+   selectedActivities.forEach(function(arrayItem){
      if (activitiesString.length !== 0) {
        activitiesString += ','
      }
-     activitiesString += arrayItem.name
+     activitiesString += arrayItem.value
    });
 
    if (activitiesString.length !== 0) {
      catUrl += '&activity=' + activitiesString
    }
 
-   severitiesRef.current.getSelectedItems().forEach(function(arrayItem){
+   selectedSeverities.forEach(function(arrayItem){
      if (severitiesString.length !== 0) {
        severitiesString += ','
      }
-     severitiesString += arrayItem.key
+     severitiesString += arrayItem.value
    });
 
    if (severitiesString.length !== 0) {
@@ -369,7 +371,7 @@ export default function App() {
  useEffect(() => {
    getEvents();
    getCurrent();
-}, [endTime, beginTime, nameOptions, namesRef.current, locationsRef.current, activitiesRef.current, severitiesRef.current, authenticated, showAddRow]);
+}, [endTime, beginTime, nameOptions, selectedNames, selectedLocations, selectedActivities, selectedSeverities, authenticated, showAddRow]);
  
  useEffect(() => {
    // Call the function
@@ -423,16 +425,16 @@ export default function App() {
      <table width="360">
      <tbody>
      <tr>
-       Names: <Multiselect id="names" name="targetNames" options={nameOptions} ref={namesRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={nameOptions} />
+       Names: <MultiSelect options={nameOptions} onChange={setSelectedNames } value={selectedNames} />
      </tr>
      <tr>
-       Locations: <Multiselect id="locations" name="targetLocations" options={locationOptions} ref={locationsRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={locationOptions} />
+       Locations: <MultiSelect options={locationOptions} onChange={setSelectedLocations } value={selectedLocations} />
      </tr>
      <tr>
-       Activity: <Multiselect id="activities" name="targetActivies" options={activityOptions} ref={activitiesRef} onSelect={getEvents } onRemove={getEvents } displayValue="name" selectedValues={activityOptions} />
+       Activity: <MultiSelect options={activityOptions} onChange={setSelectedActivities } value={selectedActivities} />
      </tr>
      <tr>
-       Severity: <Multiselect id="severity" name="targetSeverity" options={severityArray} displayValue="display" ref={severitiesRef} onSelect={getEvents } onRemove={getEvents }  selectedValues={severityArray} />
+       Severity: <MultiSelect options={severityArray} onChange={setSelectedSeverities } value={selectedSeverities} />
      </tr>
      <tr>
       From: <input type="datetime-local" defaultValue={ getTimeInputString(beginTime) } onChange={beginTimeChanged } />
