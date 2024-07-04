@@ -269,7 +269,7 @@ export default function App() {
         data.names.forEach(function(arrayItem){
           if (arrayItem !== '') {
             var activityOption = {};
-            activityOption.label = arrayItem;
+            activityOption.label = getActivityIcon(arrayItem);
             activityOption.value = arrayItem;
             activityOptions.push(activityOption);
           }
