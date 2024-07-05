@@ -79,6 +79,9 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
   }
 
  function normalizeElapsedTime(elapsed) {
+    if (elapsed == null) {
+      return elapsed
+    }
     var spaceIndex = elapsed.search(' ')
 
     if (-1 === spaceIndex) {
