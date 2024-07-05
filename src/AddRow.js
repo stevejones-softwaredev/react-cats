@@ -78,6 +78,32 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
     }
   }
 
+ function normalizeElapsedTime(elapsed) {
+    var spaceIndex = elapsed.search(' ')
+
+    if (-1 === spaceIndex) {
+      return elapsed
+    }
+
+    var dayCount = parseInt(elapsed.substring(0, spaceIndex))
+    dayCount *= 24
+    var parse = elapsed.substring(spaceIndex+1)
+    spaceIndex = parse.search(' ')
+    parse = parse.substring(spaceIndex+1)
+    var hourIndex = parse.search(':')
+    dayCount += parseInt(parse.substring(0, hourIndex))
+
+    var newElapsed = dayCount.toString()
+    newElapsed += parse.substring(hourIndex)
+
+    var dotIndex = newElapsed.search('\\.')
+    if (dotIndex !== -1) {
+      newElapsed = newElapsed.substring(0, dotIndex)
+    }
+
+    return newElapsed
+  }
+
   function getCatName() {
     if (catEvent && catEvent.cat_name) {
       return createDefaultValue(catEvent.cat_name)
@@ -191,7 +217,7 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
       <td><div style={{width: '250px'}}>
          <CreatableSelect options={getLabels(locations, 'label')} textField="name" autoSelectMatches="true" onChange={onLocationSelected} defaultValue={ getLocation() } />
       </div></td>
-      <td>{catEvent.elapsed}</td>
+      <td>{normalizeElapsedTime(catEvent.elapsed)}</td>
       <td><input type="text" onChange={onCommentChanged} value={ catEvent.comment } /></td>
       <td><input type="checkbox" onChange={onRakedChanged} checked={ catEvent.raked } /></td>
       <td><input type="button" value="Submit" onClick={ sendCatEvent } /><br /><input type="button" onClick={ closeWidget } value="Cancel"  /></td>
