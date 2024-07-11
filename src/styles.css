@@ -20,6 +20,10 @@ td {
   white-space: nowrap;
 }
 
+.hidden-cell {
+  visibility: hidden;
+}
+
 .activity-td {
   overflow: inherit;
   text-overflow: ellipsis;
@@ -95,6 +99,34 @@ td {
 .image-content {
   width: 60%;
   padding: 0px 0px;
+}
+
+.savi-poop-legend {
+  background-color: blue;
+  padding: 10px;
+  border: 1px solid green;
+}
+
+.savi-pee-legend {
+  background-color: orange;
+  padding: 10px;
+  border: 1px solid green;
+}
+
+.sydney-poop-legend {
+  background-color: green;
+  padding: 10px;
+  border: 1px solid green;
+}
+
+.sydney-pee-legend {
+  background-color: black;
+  padding: 10px;
+  border: 1px solid green;
+}
+
+#container1 * {
+  padding: 10px;
 }
 
 a {

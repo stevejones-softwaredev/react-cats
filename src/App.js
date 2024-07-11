@@ -1,7 +1,9 @@
-import { React, useEffect, useState, createRef } from "react";
+import { React, useEffect, useState } from "react";
 import prettyMilliseconds from 'pretty-ms';
 import { MultiSelect } from "react-multi-select-component";
+import { Chart } from 'react-charts'
 import EditableRow from './EditableRow.js';
+import ElapsedChart from './ElapsedChart.js';
 import LoginControl from './LoginControl.js';
 import Popup from 'reactjs-popup';
 import AddRow from './AddRow.js';
@@ -11,7 +13,7 @@ import { formatInTimeZone } from 'date-fns-tz'
 
 export default function App() {
  var initBeginTime = new Date()
- initBeginTime.setHours(initBeginTime.getHours() - 48)
+ initBeginTime.setHours(initBeginTime.getHours() - 72)
 
  const [ catEvents, setCatEvents ] = useState([])
  const [ currentEvents, setCurrentEvents ] = useState([])
@@ -36,12 +38,45 @@ export default function App() {
  const [ popupName, setPopupName] = useState("");
  const [ popupTime, setPopupTime] = useState("");
  const [ popupActivity, setPopupActivity ] = useState("")
+ const [ saviPoopSeries, setSaviPoopSeries ] = useState([])
+ const [ saviPeeSeries, setSaviPeeSeries ] = useState([])
+ const [ sydneyPoopSeries, setSydneyPoopSeries ] = useState([])
+ const [ sydneyPeeSeries, setSydneyPeeSeries ] = useState([])
+ const [ showChart, setShowChart ] = useState(false)
  
  const severityArray = [
    {value: 'ok', label: 'OK'},
    {value: 'warn', label: 'Warn'},
    {value: 'danger', label: 'Danger'}]
+
+  const data = [
+      {
+        label: 'Savi - Pee',
+        data: saviPeeSeries,
+        color: 'orange'
+      },
+      {
+        label: 'Savi - Poop',
+        data: saviPoopSeries,
+        color: 'blue'
+      },
+      {
+        label: 'Sydney - Pee',
+        data: sydneyPeeSeries,
+        color: 'black'
+      },
+      {
+        label: 'Sydney - Poop',
+        data: sydneyPoopSeries,
+        color: 'green'
+      }
+    ]
  
+  const axes =[
+      { primary: true, type: 'time', position: 'bottom' },
+      { type: 'linear', position: 'left' }
+    ]
+  
  function getCurrentElapsedStyleName(event) {
    if (event.status === 'warn') {
      return 'long-interval-data'
@@ -332,7 +367,75 @@ export default function App() {
    const response = await fetch(catUrl, { credentials : "include" });
    const data = await response.json();
 
-   setCatEvents(data.events)      
+   setCatEvents(data.events)
+   categorizeSeriesData(data.events)
+ }
+ 
+ function elapsedToMinutes(elapsed) {
+   let hourIndex = elapsed.indexOf(':')
+   let hours = parseInt(elapsed.substring(0, hourIndex))
+   let minuteIndex = elapsed.indexOf(':', hourIndex + 1)
+   let minutes = parseInt(elapsed.substring(hourIndex + 1, minuteIndex))
+
+   return (hours + minutes / 60)
+ }
+
+ function normalizeElapsedTime(elapsed) {
+   var spaceIndex = elapsed.search(' ')
+
+   if (-1 === spaceIndex) {
+     return elapsed
+   }
+
+   var dayCount = parseInt(elapsed.substring(0, spaceIndex))
+   dayCount *= 24
+   var parse = elapsed.substring(spaceIndex+1)
+   spaceIndex = parse.search(' ')
+   parse = parse.substring(spaceIndex+1)
+   var hourIndex = parse.search(':')
+   dayCount += parseInt(parse.substring(0, hourIndex))
+
+   var newElapsed = dayCount.toString()
+   newElapsed += parse.substring(hourIndex)
+
+   var dotIndex = newElapsed.search('\\.')
+   if (dotIndex !== -1) {
+     newElapsed = newElapsed.substring(0, dotIndex)
+   }
+
+   return newElapsed
+ }
+
+ function categorizeSeriesData(events) {
+   var saviPoop = []
+   var sydneyPoop = []
+   var saviPee = []
+   var sydneyPee = []
+ 
+   for (const event of events) {
+     var chartData = []
+     chartData.push(new Date(event.wyze_ts * 1000))
+     chartData.push(elapsedToMinutes(normalizeElapsedTime(event.elapsed)))
+
+     if (event.cat_name === 'Savi') {
+       if (event.cat_activity === 'Pee') {
+         saviPee.push(chartData)
+       } else {
+         saviPoop.push(chartData)
+       }
+     } else if (event.cat_name === 'Sydney') {
+       if (event.cat_activity === 'Pee') {
+         sydneyPee.push(chartData)
+       } else {
+         sydneyPoop.push(chartData)
+       }
+     }
+   }
+
+   setSaviPoopSeries(saviPoop)
+   setSaviPeeSeries(saviPee)
+   setSydneyPoopSeries(sydneyPoop)
+   setSydneyPeeSeries(sydneyPee)
  }
 
  function getTimeColumnValue(catEvent) {
@@ -354,6 +457,10 @@ export default function App() {
    } else {
      return ''
    }
+ }
+ 
+ function onToggleShowChart() {
+   setShowChart(!showChart)
  }
 
  async function onShowImage(catEvent) {
@@ -445,6 +552,17 @@ export default function App() {
     </tbody>
     </table>
     <br />
+    <div>
+     <label>
+       <input
+            type="checkbox"
+            id="showChartToggle"
+            checked={showChart}
+            onChange={onToggleShowChart} />
+       Show Chart
+     </label>
+     </div><br />
+     <ElapsedChart data={data} axes={axes} visible={ showChart } />
      <input type="button" value="Add Row" onClick={ onShowAddRow } disabled={ !authenticated || refreshPending } hidden={ !authenticated}  />
      <table>
        <thead>
