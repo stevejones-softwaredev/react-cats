@@ -1,7 +1,6 @@
 import { React, useEffect, useState } from "react";
 import prettyMilliseconds from 'pretty-ms';
 import { MultiSelect } from "react-multi-select-component";
-import { Chart } from 'react-charts'
 import EditableRow from './EditableRow.js';
 import ElapsedChart from './ElapsedChart.js';
 import LoginControl from './LoginControl.js';
@@ -38,6 +37,7 @@ export default function App() {
  const [ popupName, setPopupName] = useState("");
  const [ popupTime, setPopupTime] = useState("");
  const [ popupActivity, setPopupActivity ] = useState("")
+ const [ popupElapsed, setPopupElapsed ] = useState("")
  const [ saviPoopSeries, setSaviPoopSeries ] = useState([])
  const [ saviPeeSeries, setSaviPeeSeries ] = useState([])
  const [ sydneyPoopSeries, setSydneyPoopSeries ] = useState([])
@@ -469,6 +469,7 @@ export default function App() {
    setPopupName(catEvent.cat_name)
    setPopupTime(getTimeColumnValue(catEvent))
    setPopupActivity(getActivityIcon(catEvent.cat_activity))
+   setPopupElapsed(normalizeElapsedTime(catEvent.elapsed))
  }
  
  async function onHideImage(e) {
@@ -514,7 +515,7 @@ export default function App() {
      <h1>Cat Stuff</h1>
      <Popup open={showImagePopup} onClose={ onHideImage } className="image" >
        <img height="100%" width="100%" src={popupImage} />
-       <p style= {{textAlign:'center' }}> { popupTime } - { popupName } {popupActivity } </p>
+       <p style= {{textAlign:'center' }}> { popupTime } - { popupName } {popupActivity }  (Elapsed - { popupElapsed } ) </p>
      </Popup>
      <LoginControl initialState={authenticated} handleAuthChange={onAuthChanged} />
      <table width="360">

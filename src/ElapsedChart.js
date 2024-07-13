@@ -1,6 +1,6 @@
 //ElapsedChart.js
 
-import React, { useState } from "react";
+import React from "react";
 import { Chart } from 'react-charts'
 
 const ElapsedChart = ({ data,
