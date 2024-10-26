@@ -77,7 +77,7 @@ export default function App() {
       { primary: true, type: 'time', position: 'bottom'},
       { type: 'linear', position: 'left' }
     ]
-  
+
  function getCurrentElapsedStyleName(event) {
    if (event.status === 'warn') {
      return 'long-interval-data'
@@ -560,24 +560,24 @@ export default function App() {
     <input type="button" value="Refresh" onClick={ onRefresh } disabled={ !authenticated || refreshPending } hidden={ !authenticated}  />
      <table width="360">
      <tbody>
-     <tr>
+     <tr><td>
        Names: <MultiSelect options={nameOptions} onChange={setSelectedNames } value={selectedNames} />
-     </tr>
-     <tr>
+     </td></tr>
+     <tr><td>
        Locations: <MultiSelect options={locationOptions} onChange={setSelectedLocations } value={selectedLocations} />
-     </tr>
-     <tr>
+     </td></tr>
+     <tr><td>
        Activity: <MultiSelect options={activityOptions} onChange={setSelectedActivities } value={selectedActivities} />
-     </tr>
-     <tr>
+     </td></tr>
+     <tr><td>
        Severity: <MultiSelect options={severityArray} onChange={setSelectedSeverities } value={selectedSeverities} />
-     </tr>
-     <tr>
+     </td></tr>
+     <tr><td>
       From: <input type="datetime-local" defaultValue={ getTimeInputString(beginTime) } onChange={beginTimeChanged } />
-    </tr>
-     <tr>
+    </td></tr>
+     <tr><td>
       To: <input type="datetime-local" defaultValue={ getTimeInputString(endTime) } onChange={endTimeChanged } />
-    </tr>
+    </td></tr>
     </tbody>
     </table>
     <br />

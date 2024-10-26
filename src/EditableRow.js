@@ -12,7 +12,7 @@ const EditableRow = ({ names,
                        authenticated,
                        errorMessage,
                        catEvent,
-                       key,
+                       row_key,
                        onSubmit,
                        onAddRowKeyDown,
                        onClickOutside,
@@ -138,7 +138,7 @@ const EditableRow = ({ names,
                errorMessage="" />)
          }
          { !isEditing && (
-         <tr key={key} className={getDayStyleName(catEvent)} onDoubleClick={ onRowClicked } data-cat-event={JSON.stringify(catEvent) } >
+         <tr key={row_key} className={getDayStyleName(catEvent)} onDoubleClick={ onRowClicked } data-cat-event={JSON.stringify(catEvent) } >
              <td>{ getTimeColumnValue(catEvent) }</td>
              <td className={getClassName(catEvent.cat_name) }>{catEvent.cat_name }</td>
              <td onClick={onImageClick} className="activity-td" >{getActivityIcon(catEvent.cat_activity)} </td>
