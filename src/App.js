@@ -43,6 +43,7 @@ export default function App() {
  const [ sydneyPoopSeries, setSydneyPoopSeries ] = useState([])
  const [ sydneyPeeSeries, setSydneyPeeSeries ] = useState([])
  const [ showChart, setShowChart ] = useState(false)
+ const [ appendCurrentTime, setAppendCurrentTime ] = useState(true)
  
  const severityArray = [
    {value: 'ok', label: 'OK'},
@@ -126,6 +127,7 @@ export default function App() {
  function endTimeChanged(e) {
    var highTime = new Date(e.target.value)
    setEndTime(new Date(highTime.getTime()))
+   setAppendCurrentTime(false)
  }
 
  async function getCurrent() {
@@ -431,11 +433,37 @@ export default function App() {
        }
      }
    }
+   
+   if (appendCurrentTime) {
+     if (saviPoop[saviPoop.length - 1] !== undefined) {
+       saviPoop.unshift(makePlaceholder(saviPoop[saviPoop.length - 1]))
+     }
+
+     if (saviPee[saviPee.length - 1] !== undefined) {
+       saviPee.unshift(makePlaceholder(saviPee[saviPee.length - 1]))
+     }
+
+     if (sydneyPoop[sydneyPoop.length - 1] !== undefined) {
+       sydneyPoop.unshift(makePlaceholder(sydneyPoop[sydneyPoop.length - 1]))
+     }
+
+     if (sydneyPee[sydneyPee.length - 1] !== undefined) {
+       sydneyPee.unshift(makePlaceholder(sydneyPee[sydneyPee.length - 1]))
+     }
+   }
 
    setSaviPoopSeries(saviPoop)
    setSaviPeeSeries(saviPee)
    setSydneyPoopSeries(sydneyPoop)
    setSydneyPeeSeries(sydneyPee)
+ }
+ 
+ function makePlaceholder(lastReal) {
+   var placeholderChartData = []
+   placeholderChartData.push(currentTime)
+   placeholderChartData.push((currentTime - lastReal[0]) / (1000 * 60))
+   
+   return placeholderChartData
  }
 
  function getTimeColumnValue(catEvent) {
