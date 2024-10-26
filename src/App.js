@@ -74,7 +74,7 @@ export default function App() {
     ]
  
   const axes =[
-      { primary: true, type: 'time', position: 'bottom' },
+      { primary: true, type: 'time', position: 'bottom'},
       { type: 'linear', position: 'left' }
     ]
   
@@ -433,22 +433,22 @@ export default function App() {
        }
      }
    }
-   
+
    if (appendCurrentTime) {
-     if (saviPoop[saviPoop.length - 1] !== undefined) {
-       saviPoop.unshift(makePlaceholder(saviPoop[saviPoop.length - 1]))
+     if (saviPoop.length > 0) {
+       saviPoop.unshift(makePlaceholder(saviPoop[0]))
      }
 
-     if (saviPee[saviPee.length - 1] !== undefined) {
-       saviPee.unshift(makePlaceholder(saviPee[saviPee.length - 1]))
+     if (saviPee.length > 0) {
+       saviPee.unshift(makePlaceholder(saviPee[0]))
      }
 
-     if (sydneyPoop[sydneyPoop.length - 1] !== undefined) {
-       sydneyPoop.unshift(makePlaceholder(sydneyPoop[sydneyPoop.length - 1]))
+     if (sydneyPoop.length > 0) {
+       sydneyPoop.unshift(makePlaceholder(sydneyPoop[0]))
      }
 
-     if (sydneyPee[sydneyPee.length - 1] !== undefined) {
-       sydneyPee.unshift(makePlaceholder(sydneyPee[sydneyPee.length - 1]))
+     if (sydneyPee.length > 0) {
+       sydneyPee.unshift(makePlaceholder(sydneyPee[0]))
      }
    }
 
@@ -457,12 +457,12 @@ export default function App() {
    setSydneyPoopSeries(sydneyPoop)
    setSydneyPeeSeries(sydneyPee)
  }
- 
- function makePlaceholder(lastReal) {
+
+ function makePlaceholder(previousReal) {
    var placeholderChartData = []
    placeholderChartData.push(currentTime)
-   placeholderChartData.push((currentTime - lastReal[0]) / (1000 * 60))
-   
+   placeholderChartData.push((currentTime - previousReal[0]) / (1000 * 60 * 60))
+
    return placeholderChartData
  }
 
