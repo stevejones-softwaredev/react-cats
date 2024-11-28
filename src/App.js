@@ -1,6 +1,7 @@
 import { React, useEffect, useState } from "react";
 import prettyMilliseconds from 'pretty-ms';
 import { MultiSelect } from "react-multi-select-component";
+import BoundCheckbox from './BoundCheckbox.js';
 import EditableRow from './EditableRow.js';
 import ElapsedChart from './ElapsedChart.js';
 import LoginControl from './LoginControl.js';
@@ -19,6 +20,7 @@ export default function App() {
  const [ nameOptions, setNameOptions ] = useState([])
  const [ locationOptions, setLocationOptions ] = useState([])
  const [ activityOptions, setActivityOptions ] = useState([])
+ const [ eventSourceList, setEventSourceList ] = useState([])
  const [ selectedNames, setSelectedNames ] = useState([])
  const [ selectedLocations, setSelectedLocations ] = useState([])
  const [ selectedActivities, setSelectedActivities ] = useState([])
@@ -145,8 +147,6 @@ export default function App() {
  }
 
  async function onUpdateEvent(catEvent) {
-   console.log(catEvent.event_ts)
-   console.log(catEvent)
    patchRecord(catEvent, true)
  }
 
@@ -167,6 +167,7 @@ export default function App() {
    fetchNames()
    fetchLocations()
    fetchActivities()
+   getEventSources()
    setSyncTime(new Date())
  }
 
@@ -218,6 +219,7 @@ export default function App() {
      fetchNames()
      fetchLocations()
      fetchActivities()
+     getEventSources()
      setSyncTime(new Date())
      window.location.reload()
    }
@@ -258,6 +260,22 @@ export default function App() {
    if (reload) {
      window.location.reload()
    }
+ }
+ 
+ async function toggleEventSource(enabled, eventSource) {
+   eventSource.enabled = !enabled
+   var updateEventSourceUrl = process.env.REACT_APP_API_HOST + '/api/cats/sources'
+   var eventSources = [eventSource]
+   var requestBody = JSON.stringify(eventSources)
+
+   const headers = { 'Authorization': authHeader };
+   await fetch(updateEventSourceUrl,
+     {
+       method: 'PUT',
+       body: requestBody,
+       headers: headers
+     }
+   );
  }
 
  const fetchNames = async () => {
@@ -313,6 +331,16 @@ export default function App() {
         });
 
         setActivityOptions(activityOptions)
+ }
+ 
+ async function getEventSources() {
+   var eventSourceUrl = process.env.REACT_APP_API_HOST + '/api/cats/sources'
+
+   const response = await fetch(eventSourceUrl, { credentials : "include" });
+   const data = await response.json();
+
+   setEventSourceList(data)
+   console.log(eventSourceList)
  }
 
  async function getEvents() {
@@ -514,6 +542,7 @@ export default function App() {
    fetchNames()
    fetchLocations()
    fetchActivities()
+   getEventSources()
    setSyncTime(new Date())
 }, []);
 
@@ -523,6 +552,7 @@ export default function App() {
     }, 1000);
 
     return () => clearInterval(interval);
+
   }, []);
 
   useEffect(() => {
@@ -532,6 +562,7 @@ export default function App() {
      fetchNames()
      fetchLocations()
      fetchActivities()
+     getEventSources()
      setSyncTime(new Date())
     }, 60000);
 
@@ -581,13 +612,35 @@ export default function App() {
     </tbody>
     </table>
     <br />
+    <table width="360">
+      <tbody>
+      <tr key="Header">
+        <b>Event Sources</b>
+      </tr>
+        {
+          eventSourceList.map( (eventSource, key) =>
+            <tr key={key} align="left">
+              <td>
+                <BoundCheckbox
+                  initialState={eventSource.enabled}
+                  readOnly={!authenticated}
+                  context={eventSource}
+                  label={eventSource.name}
+                  onChangeComplete={toggleEventSource} />
+              </td>
+            </tr>
+          )
+        }
+      </tbody>
+    </table>
+    <br />
     <div>
      <label>
-       <input
-            type="checkbox"
-            id="showChartToggle"
-            checked={showChart}
-            onChange={onToggleShowChart} />
+      <input
+           type="checkbox"
+           id="showChartToggle"
+           checked={showChart}
+           onChange={onToggleShowChart} />
        Show Chart
      </label>
      </div><br />

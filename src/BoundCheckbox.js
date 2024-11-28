@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import "./editable-text.css";
 
-const BoundCheckbox = ({ backGroundColor, initialState, context, onChangeComplete, readOnly }) => {
+const BoundCheckbox = ({ backGroundColor, initialState, context, onChangeComplete, readOnly, label }) => {
   const [checked, setChecked] = useState(initialState);
 
   const handleChange = (event) => {
@@ -16,22 +16,14 @@ const BoundCheckbox = ({ backGroundColor, initialState, context, onChangeComplet
 
   return (
     <div onClick={handleClick}>
-    {readOnly ? (
       <span width="130" >
         <input
           type="checkbox"
           checked={initialState}
           onChange={handleChange}
-          disabled />
+          disabled={readOnly} />
         </span>
-      ) : (
-      <span width="130" >
-        <input
-          type="checkbox"
-          checked={initialState}
-          onChange={handleChange} />
-        </span>
-      )}
+        <label>{label}</label>
     </div>
   );
 };
