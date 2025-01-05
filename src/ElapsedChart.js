@@ -6,15 +6,11 @@ import { Chart } from 'react-charts'
 const ElapsedChart = ({ data,
                         axes,
                         visible}) => {
-  function onClick() {
-    console.log("Visible = " + visible)
-  }
-
   return (
     <React.Fragment >
     {
       visible && (
-        <div onClick={onClick}>
+        <div>
         <h1>Elapsed Time</h1>
         <div
           id="container1"

@@ -26,6 +26,8 @@ const EditableRow = ({ names,
      return '💩'
    } else if (activity === 'Pee') {
      return '💦'
+   } else if (activity === 'Exception') {
+     return '🚨'
    } else {
      return ''
    }
@@ -129,7 +131,7 @@ const EditableRow = ({ names,
          <AddRow
                names={names}
                locations={locations}
-               activities={[{name: "💦"}, {name: "💩"}]}
+               activities={[{name: "💦"}, {name: "💩"}, {name: "🚨"}]}
                onSubmit={ onSubmit }
                onClickOutside={ onDismissEdit }
                onCancel={ onDismissEdit }

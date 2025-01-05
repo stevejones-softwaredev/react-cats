@@ -73,6 +73,8 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
       return ({ label: "💦", value: "💦" })
     } else if (initial === "Poop") {
       return ({ label: "💩", value: "💩" })
+    } else if (initial === "Exception") {
+      return ({ label: "🚨", value: "🚨" })
     } else {
       return ({ label: initial, value: initial })
     }
@@ -155,6 +157,8 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
       setActivity("Pee")
     } else if (event.label === "💩") {
       setActivity("Poop")
+    } else if (event.label === '🚨') {
+      setActivity('Exception')
     } else {
       setActivity(event.label)
     }

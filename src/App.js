@@ -510,8 +510,10 @@ export default function App() {
      return '💩'
    } else if (activity === 'Pee') {
      return '💦'
+   } else if (activity === 'Exception') {
+     return '🚨'
    } else {
-     return ''
+     return activity
    }
  }
  
@@ -664,7 +666,7 @@ export default function App() {
              <AddRow
                names={nameOptions}
                locations={locationOptions}
-               activities={[{name: "💦"}, {name: "💩"}]}
+               activities={[{name: "💦"}, {name: "💩"}, {name: "🚨"}]}
                onSubmit={ onSubmitRow }
                onCancel={ onCloseAddRow }
                catEvent={ {} }
