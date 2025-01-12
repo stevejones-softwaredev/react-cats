@@ -450,13 +450,13 @@ export default function App() {
      if (event.cat_name === 'Savi') {
        if (event.cat_activity === 'Pee') {
          saviPee.push(chartData)
-       } else {
+       } else if (event.cat_activity === 'Poop'){
          saviPoop.push(chartData)
        }
      } else if (event.cat_name === 'Sydney') {
        if (event.cat_activity === 'Pee') {
          sydneyPee.push(chartData)
-       } else {
+       } else if (event.cat_activity === 'Poop'){
          sydneyPoop.push(chartData)
        }
      }
