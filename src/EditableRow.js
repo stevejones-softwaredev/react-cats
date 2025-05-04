@@ -117,6 +117,12 @@ const EditableRow = ({ names,
    setIsEditing(false)
  }
 
+ async function onSubmitClicked(data) {
+   console.log("onSubmitClicked")
+   onSubmit(data)
+   setIsEditing(false)
+ }
+
  const onKeyDown = (event) => {
    if (event.key === 'Escape') {
      onDismissEdit(false)
@@ -132,7 +138,7 @@ const EditableRow = ({ names,
                names={names}
                locations={locations}
                activities={[{name: "💦"}, {name: "💩"}, {name: "🚨"}]}
-               onSubmit={ onSubmit }
+               onSubmit={ onSubmitClicked }
                onClickOutside={ onDismissEdit }
                onCancel={ onDismissEdit }
                onAddRowKeyDown={ onKeyDown }

@@ -147,7 +147,7 @@ export default function App() {
  }
 
  async function onUpdateEvent(catEvent) {
-   patchRecord(catEvent, true)
+   patchRecord(catEvent, false)
  }
 
  async function onRefresh() {
@@ -249,6 +249,7 @@ export default function App() {
      requestBody = JSON.stringify(event)
    }
 
+   setShowAddRow(false)
    const headers = { 'Authorization': authHeader };
    await fetch(updateUrl,
      {
@@ -340,7 +341,6 @@ export default function App() {
    const data = await response.json();
 
    setEventSourceList(data)
-   console.log(eventSourceList)
  }
 
  async function getEvents() {
@@ -533,7 +533,23 @@ export default function App() {
  async function onHideImage(e) {
    setShowImagePopup(false)
  }
- 
+
+  useEffect(() => {
+    // opening a connection to the server to begin receiving events from it
+    var catUrl = process.env.REACT_APP_API_HOST + '/api/cats/notifications'
+    const eventSource = new EventSource(catUrl);
+
+    // attaching a handler to receive message events
+    eventSource.onmessage = (event) => {
+      console.log("Event received")
+      getEvents();
+      getCurrent();
+    };
+
+    // terminating the connection on component unmount
+    return () => eventSource.close();
+  }, []);
+
  useEffect(() => {
    getEvents();
    getCurrent();

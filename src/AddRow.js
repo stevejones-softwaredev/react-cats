@@ -13,15 +13,11 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
     initialTime = String(new Date().valueOf())
   }
 
-  console.log(catEvent)
   if (catEvent && catEvent.wyze_ts) {
-    console.log("Wyze ts: " + (catEvent.wyze_ts * 1000))
     initialDate = new Date(catEvent.wyze_ts * 1000)
   } else {
     initialDate = new Date()
   }
-
-  console.log('Initial Date: ' + initialDate.toLocaleString())
 
   const [ eventTime, setEventTime] = useState(initialTime);
   const [ wyzeTs, setWyzeTs] = useState(initialDate);
@@ -135,7 +131,6 @@ const AddRow = ({ names, locations, activities, onSubmit, onCancel, onAddRowKeyD
 
  function getTimeInputString(targetDate) {
    var localTime = new Date(targetDate.getTime() - (targetDate.getTimezoneOffset() * 60000))
-   console.log(localTime.toISOString().split('.')[0])
    return localTime.toISOString().split('.')[0]
  }
 
